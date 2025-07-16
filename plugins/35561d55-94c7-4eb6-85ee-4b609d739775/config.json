@@ -1,0 +1,9 @@
+{
+    "name": "Đề xuất",
+    "version": "1.0.0",
+    "install" : "true",
+    "id": "io.eclo.proposal",
+    "author": "ECLO",
+    "description": "Phần mềm đề xuất",
+    "requires": "1.0.0"
+}

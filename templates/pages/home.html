@@ -1,0 +1,126 @@
+<div class="container-fluid py-2">
+    <div class="row g-3">
+        <div class="col-lg-12">
+            <div class="row g-3">
+                <div class="col-lg-6">
+                    <div class="row g-3">
+                        <div class="col-lg-12">
+                            <div class="card shadow border-0 bg-body bg-opacity-50 rounded-4">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between w-100">
+                                        <div class="w-100">
+                                            <span class="fw-500 ">Tổng <?=$jatbi->lang("Tháng")?> <?=$month?>/<?=$year?></span>
+                                            <h4 class="mb-3 mt-1 f-w-500 mb-0 f-22">
+                                                <span class="fw-bold text-eclo">0</span>
+                                            </h4>
+                                            <span class="fw-500">Tổng <?=$jatbi->lang("Tháng")?> <?=$month?>/<?=$year?></span>
+                                            <h4 class="mb-3 mt-1 f-w-500 mb-0 f-22">
+                                                <span class="fw-bold text-success">0</span>
+                                            </h4>
+                                            <a class="btn btn-eclo rounded-pill p-2 px-3 fw-bold" href="#" data-pjax>Xem thêm</a>
+                                        </div>
+                                        <div class="mobile-right-img"><img class="w-100" src="/assets/img/Revenue-bro.svg" alt="Doanh thu hôm nay"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card shadow border-0 bg-body bg-opacity-50 rounded-4">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between w-100">
+                                        <div class="w-100">
+                                            <span class="f-w-500 f-light">Doanh thu hôm nay</span>
+                                            <h4 class="mb-3 mt-1 f-w-500 mb-0 fs-5">
+                                                <span class="fw-bold text-success">0</span>
+                                            </h4>
+                                        </div>
+                                        <div class="">
+                                            <i class="ti ti-brand-cashapp shadow fs-3 card border p-3 d-inline-block rounded-4 border-0 text-success"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card shadow border-0 bg-body bg-opacity-50 rounded-4">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between w-100">
+                                        <div class="w-100">
+                                            <span class="f-w-500 f-light">Số khách hôm nay</span>
+                                            <h4 class="mb-3 mt-1 f-w-500 mb-0 fs-5">
+                                                <span class="fw-bold">0</span>
+                                            </h4>
+                                        </div>
+                                        <div class="">
+                                            <i class="ti ti-users-plus shadow fs-3 card border p-3 d-inline-block rounded-4 border-0 "></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card shadow border-0 bg-body bg-opacity-50 rounded-4">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between w-100">
+                                        <div class="w-100">
+                                            <span class="f-w-500 f-light">Ghi Nợ hôm nay</span>
+                                            <h4 class="mb-3 mt-1 f-w-500 mb-0 fs-5">
+                                                <span class="fw-bold text-danger">0</span>
+                                            </h4>
+                                        </div>
+                                        <div class="">
+                                            <i class="ti ti-file-invoice shadow fs-3 card border p-3 d-inline-block rounded-4 border-0 text-danger"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card shadow border-0 bg-body bg-opacity-50 rounded-4">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between w-100">
+                                        <div class="w-100">
+                                            <span class="f-w-500 f-light">Số hóa đơn hôm nay</span>
+                                            <h4 class="mb-3 mt-1 f-w-500 mb-0 fs-5">
+                                                <span class="fw-bold text-eclo">0</span>
+                                            </h4>
+                                        </div>
+                                        <div class="">
+                                            <i class="ti ti-checkup-list shadow fs-3 card border p-3 d-inline-block rounded-4 border-0 text-eclo"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card bg-body bg-opacity-50 rounded-5 shadow border-0 p-3 calendar h-100">
+                        <h6 class="fw-bold mb-3">Lịch  <?=$month?>/<?=$year?></h6>
+                        <div class="calendar-header">
+                            <?php foreach ($weeks as $week){ ?>
+                                <div class="bg-eclo bg-opacity-75 text-white rounded-3 m-1 p-2 fw-bold"><?=$week?></div>
+                            <?php } ?>
+                        </div>
+                        <div class="calendar-body">
+                            <?php for ($i = 1; $i < $startDay; $i++) { ?>
+                                <div class="bg-transparent m-1"></div>
+                            <?php } ?>
+                            <?php for ($day = 1; $day <= $dayLastMonth; $day++) {
+                                $today = (date('m') == $month && date('d') == $day && date('Y') == $year) ? 'bg-info bg-opacity-25' : 'bg-body-secondary bg-opacity-50';
+                                $chartdate[] = $day;
+                                $date = date("Y-m-d",strtotime($year.'-'.$month.'-'.$day));
+                            ?>
+                                <div class="<?=$today?> rounded-3 m-1 position-relative min-height" style="--min-height:50px">
+                                    <div class="d-flex align-items-center justify-content-between w-100 p-1">
+                                        <div class="rounded-1 p-1 width height d-flex align-items-center justify-content-center" style="--width:20px;--height:20px;"><?=$day?></div>
+                                    </div>
+                                </div>
+                            <?php } ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
