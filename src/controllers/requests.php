@@ -160,7 +160,12 @@ $requests = [
                         "name" => $jatbi->lang("Vận chuyển"),
                         "router" => '/admin/transport',
                         "icon" => '<i class="fas fa-shipping-fast"></i>',
-                    ],                    
+                    ], 
+                    'type-payments'	=> [
+						"name"	=> $jatbi->lang("Hình thức thanh toán"),
+						"router"	=> '/admin/type-payments',
+						"icon"	=> '<i class="fas fa-money-bill-wave"></i>',
+					],                   
                     'flood' => [
                         "name" => $jatbi->lang("Danh sách chặn"),
                         "router" => '/admin/flood',
@@ -210,6 +215,10 @@ $requests = [
                     'logs' => $jatbi->lang("Nhật ký"),
                     'trash' => $jatbi->lang("Thùng rác"),
                     'coupons' => $jatbi->lang("Thẻ quà tặng"),
+                    'type-payments' => $jatbi->lang("Hình thức thanh toán"),
+                    'type-payments.add' => $jatbi->lang("Thêm Hình thức thanh toán"),
+                    'type-payments.edit' => $jatbi->lang("Sửa Hình thức thanh toán"),
+                    'type-payments.deleted' => $jatbi->lang("Xóa Hình thức thanh toán"),
                 ]
             ],
         ],

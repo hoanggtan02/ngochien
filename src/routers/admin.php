@@ -1112,5 +1112,122 @@
                 ]);
             }
         })->setPermissions(['coupons']);
+        //type-payments start
+        $app->router('/type-payments', ['GET', 'POST'], function($vars) use ($app, $jatbi, $setting) {
+            $jatbi->permission('type-payments');
+            $vars['title'] = $jatbi->lang("Hình thức thanh toán");
+
+            if ($app->method() === 'GET') {
+                echo $app->render($setting['template'] . '/admin/type-payments.html', $vars);
+            } 
+            elseif ($app->method() === 'POST') {
+                // Đặt header chuẩn UTF-8 để tránh lỗi JSON
+                $app->header(['Content-Type' => 'application/json; charset=utf-8']);
+                
+                // Lấy các tham số từ DataTables
+                $draw = isset($_POST['draw']) ? intval($_POST['draw']) : 0;
+                $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
+                $length = isset($_POST['length']) ? intval($_POST['length']) : 10;
+                
+                $globalSearch = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
+                $nameFilter = isset($_POST['name_filter']) ? $_POST['name_filter'] : '';
+                $statusValue = isset($_POST['status']) ? $_POST['status'] : '';
+
+                $orderName = isset($_POST['order'][0]['name']) ? $_POST['order'][0]['name'] : 'id';
+                $orderDir = isset($_POST['order'][0]['dir']) ? $_POST['order'][0]['dir'] : 'DESC';
+
+                // Xây dựng điều kiện WHERE
+                $where = [
+                    "AND" => [
+                        "deleted" => 0,
+                    ]
+                ];
+
+                // Xử lý tìm kiếm
+                if ($nameFilter != '') {
+                    $where['AND']['name[~]'] = $nameFilter;
+                } elseif ($globalSearch != '') {
+                    $where['AND']['OR'] = [
+                        'name[~]' => $globalSearch,
+                        'notes[~]' => $globalSearch,
+                    ];
+                }
+
+                // Lọc theo trạng thái
+                $where['AND']['status'] = ($statusValue != '') ? $statusValue : ['A', 'D'];
+
+                // Đếm tổng số bản ghi
+                $count = $app->count("type_payments", $where);
+                
+                // Thêm LIMIT và ORDER để phân trang
+                $where["LIMIT"] = [$start, $length];
+                $where["ORDER"] = [$orderName => strtoupper($orderDir)]; 
+                $datas = [];
+                $allData = $app->select("type_payments", "*", $where);
+
+                $payment_type_map = [
+                    '1' => 'Bán hàng',
+                    '2' => 'Mua hàng',
+                ];
+
+        
+                foreach ($allData as $data) {
+                    // Lấy thông tin tài khoản có
+                    $credit_info = $app->get("accountants_code", ["code", "name"], ["code" => $data['has']]);
+                    $credit_account_text = $credit_info ? ($credit_info['code'] . ' - ' . $credit_info['name']) : ($data['has'] ?? '');
+
+                    // Lấy thông tin tài khoản nợ
+                    $debit_info = $app->get("accountants_code", ["code", "name"], ["code" => $data['debt']]);
+                    $debit_account_text = $debit_info ? ($debit_info['code'] . ' - ' . $debit_info['name']) : ($data['debt'] ?? '');
+
+                    $datas[] = [
+                        "checkbox" => $app->component("box", ["data" => $data['active'] ?? '']),
+                        "name" => $data['name'] ?? '',
+                        "credit_account" => $credit_account_text,
+                        "debit_account" => $debit_account_text,
+                        "main" => $app->get("type_payments", "name", ["id" => $data['main']]),
+                    
+                        "payment_type" => $payment_type_map[$data['type']] ?? 'Không xác định',
+                        "notes" => $data['notes'] ?? '',
+                        "status" => $app->component("status", [
+                            "url" => "/admin/type-payments-status/" . ($data['active'] ?? ''),
+                            "data" => $data['status'] ?? '',
+                            "permission" => ['type-payments.edit']
+                        ]),
+                        "action" => $app->component("action", [
+                            "button" => [
+                                [
+                                    'type' => 'button',
+                                    'name' => $jatbi->lang("Sửa"),
+                                    'permission' => ['type-payments.edit'],
+                                    'action' => ['data-url' => '/admin/type-payments-edit/' . ($data['active'] ?? ''), 'data-action' => 'modal']
+                                ],
+                                [
+                                    'type' => 'button',
+                                    'name' => $jatbi->lang("Xóa"),
+                                    'permission' => ['type-payments.deleted'],
+                                    'action' => ['data-url' => '/admin/type-payments-deleted?box=' . ($data['active'] ?? ''), 'data-action' => 'modal']
+                                ],
+                            ]
+                        ]),
+                    ];
+                }
+
+                // Trả về dữ liệu JSON
+                echo json_encode(
+                    [
+                        "draw" => $draw,
+                        "recordsTotal" => $count,
+                        "recordsFiltered" => $count,
+                        "data" => $datas ?? []
+                    ],
+                    JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE
+                );
+                
+                exit();
+            }
+        })->setPermissions(['type-payments']);
+        //type-payments end
+
     })->middleware('login');
 ?>
