@@ -119,6 +119,11 @@ $requests = [
                         "router" => '/admin/transport',
                         "icon" => '<i class="fas fa-shipping-fast"></i>',
                     ],
+                    'type-payments'	=> [
+						"name"	=> $jatbi->lang("Hình thức thanh toán"),
+						"router"	=> '/admin/type-payments',
+						"icon"	=> '<i class="fas fa-money-bill-wave"></i>',
+					],
                     'blockip' => [
                         "name" => $jatbi->lang("Chặn truy cập"),
                         "router" => '/admin/blockip',
@@ -151,6 +156,10 @@ $requests = [
                     'transport.add' => $jatbi->lang("Thêm Vận chuyển"),
                     'transport.edit' => $jatbi->lang("Sửa Vận chuyển"),
                     'transport.deleted' => $jatbi->lang("Xóa Vận chuyển"),
+                    'type-payments' => $jatbi->lang("Hình thức thanh toán"),
+                    'type-payments.add' => $jatbi->lang("Thêm Hình thức thanh toán"),
+                    'type-payments.edit' => $jatbi->lang("Sửa Hình thức thanh toán"),
+                    'type-payments.deleted' => $jatbi->lang("Xóa Hình thức thanh toán"),
                     'blockip' => $jatbi->lang("Chặn truy cập"),
                     'blockip.add' => $jatbi->lang("Thêm Chặn truy cập"),
                     'blockip.edit' => $jatbi->lang("Sửa Chặn truy cập"),
