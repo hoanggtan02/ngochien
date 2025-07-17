@@ -979,5 +979,138 @@
             // $app->redirect($_SERVER['HTTP_REFERER']);
 
         });
+        $app->router("/coupons", ['GET', 'POST'], function($vars) use ($app, $jatbi,$setting) {
+            $vars['title'] = $jatbi->lang("Thẻ quà tặng");
+            if ($app->method() === 'GET') {
+                echo $app->render($setting['template'].'/admin/coupons.html', $vars);
+            }
+            elseif ($app->method() === 'POST') {
+                $app->header([
+                    'Content-Type' => 'application/json',
+                ]);
+
+                // Lấy tham số từ DataTables
+                $draw = isset($_POST['draw']) ? intval($_POST['draw']) : 0;
+                $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
+                $length = isset($_POST['length']) ? intval($_POST['length']) : $setting['site_page'] ?? 10;
+                $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
+                $orderName = isset($_POST['order'][0]['name']) ? $_POST['order'][0]['name'] : 'id';
+                $orderDir = isset($_POST['order'][0]['dir']) ? $_POST['order'][0]['dir'] : 'DESC';
+                $status = isset($_POST['status']) ? ($_POST['status'] ? [$_POST['status']] : ['A', 'D']) : ['A', 'D'];
+
+                // Điều kiện lọc
+                $where = [
+                    "AND" => [
+                        "name[~]" => $searchValue ?: '%',
+                        "status[<>]" => $status,
+                        "deleted" => 0,
+                    ],
+                    "LIMIT" => [$start, $length],
+                    "ORDER" => [$orderName => strtoupper($orderDir)],
+                ];
+
+                // Đếm tổng số bản ghi
+                $count = $app->count("coupons", [
+                    "AND" => $where['AND'],
+                ]);
+
+                // Lấy dữ liệu phiếu giảm giá
+                $datas = [];
+                $app->select("coupons", "*", $where, function ($data) use (&$datas, $jatbi, $app) {
+                    //Xử lý dữ liệu thời hạn
+                    $start = new DateTime($data['date_start']);
+                    $end = new DateTime($data['date_end']);
+                    $diff = $end->diff($start);
+
+                    $dueDate = "{$diff->y} Năm {$diff->m} Tháng {$diff->d} Ngày {$diff->h} Giờ {$diff->i} Phút";
+                    // Xử lý dữ liệu áp dụng
+                    $apply = '';
+
+                    if ($data['multi'] == 1) {
+                        $apply .= $jatbi->lang('Áp dụng chung cho nhiều thẻ khác') . '<br>';
+                    }
+
+                    $categorys = @unserialize($data['categorys']);
+                    if (is_array($categorys) && count($categorys) > 0) {
+                        $apply .= '<div class="d-flex mb-2">';
+                        $apply .= '<strong class="me-2">' . $jatbi->lang('Danh mục') . '</strong>';
+                        foreach ($categorys as $category) {
+                            $name = $app->get("categorys", "name", ["id" => $category]);
+                            $apply .= '<span class="badge bg-primary me-2 p-1">' . $name . '</span>';
+                        }
+                        $apply .= '</div>';
+                    }
+
+                    $products = @unserialize($data['products']);
+                    if (is_array($products) && count($products) > 0) {
+                        $apply .= '<div class="d-flex mb-2">';
+                        $apply .= '<strong class="me-2">' . $jatbi->lang('Sản phẩm') . '</strong>';
+                        foreach ($products as $product) {
+                            $name = $app->get("products", "name", ["id" => $product]);
+                            $apply .= '<span class="badge bg-primary me-2 p-1">' . $name . '</span>';
+                        }
+                        $apply .= '</div>';
+                    }
+
+                    $customers = @unserialize($data['customers']);
+                    if (is_array($customers) && count($customers) > 0) {
+                        $apply .= '<div class="d-flex mb-2">';
+                        $apply .= '<strong class="me-2">' . $jatbi->lang('Khách hàng') . '</strong>';
+                        foreach ($customers as $customer) {
+                            $name = $app->get("customers", "name", ["id" => $customer]);
+                            $apply .= '<span class="badge bg-primary me-2 p-1">' . $name . '</span>';
+                        }
+                        $apply .= '</div>';
+                    }
+                    $datas[] = [
+                        "checkbox" => $app->component("box", ["data" => $data['id']]),
+                        "name" => $data['name'],
+                        "code" => $data['code'] ?? '',
+                        "count_used" => $data['count_used'] . '/' . ($data['count']),
+                        "dueDate" => date("d/m/Y", strtotime($data['date_start'])) .'-'. date("d/m/Y", strtotime($data['date_end'])) . '<br>' . $dueDate,
+                        "discount" => ($data['type'] == 1 ? $data['percent'] . '%' : number_format($data['price'])),
+                        "apply" => $apply,
+                        "notes" => $data['notes'] ?? '',
+                        "date" => date("d/m/Y H:i:s", strtotime($data['date'])),
+                        "accounts" => $app->get("accounts","name",["id"=>$data['user']]),
+                        "status" => $app->component("status", [
+                            "url" => "/coupons/coupons-status/" . $data['id'],
+                            "data" => $data['status'],
+                            "permission" => ['coupons.edit']
+                        ]),
+                        "action" => $app->component("action", [
+                            "button" => [
+                                [
+                                    'type' => 'link',
+                                    'name' => $jatbi->lang("Xem"),
+                                    'permission' => ['coupons'],
+                                    'action' => ['href' => '/coupons/coupons-views/' . $data['id'], 'data-pjax' => '']
+                                ],
+                                [
+                                    'type' => 'button',
+                                    'name' => $jatbi->lang("Sửa"),
+                                    'permission' => ['coupons.edit'],
+                                    'action' => ['data-url' => '/coupons/coupons-edit/' . $data['id'], 'data-action' => 'modal']
+                                ],
+                                [
+                                    'type' => 'button',
+                                    'name' => $jatbi->lang("Xóa"),
+                                    'permission' => ['coupons.deleted'],
+                                    'action' => ['data-url' => '/coupons/coupons-deleted?box=' . $data['id'], 'data-action' => 'modal']
+                                ],
+                            ]
+                        ]),
+                    ];
+                });
+
+                // Trả về dữ liệu JSON
+                echo json_encode([
+                    "draw" => $draw,
+                    "recordsTotal" => $count,
+                    "recordsFiltered" => $count,
+                    "data" => $datas ?? [],
+                ]);
+            }
+        })->setPermissions(['coupons']);
     })->middleware('login');
 ?>

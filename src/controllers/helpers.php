@@ -5,6 +5,7 @@
 	    public function __construct($app) {
 	        $this->app = $app;
 	    }
+		
 	    public function date($date){
 	    	$getConfig = $this->app->get("config","*");
 	    	return date($getConfig['date'],strtotime($date));

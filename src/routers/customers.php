@@ -45,9 +45,8 @@
                 $app->select("customers", [
                         "[>]customers_types" => ["type" => "id"],
                         "[>]accounts" => ["user" => "id"],
-                        //"[>]invoices_clone" => ["id" => "customers"],
-
-                    ], 
+                        // "[>]invoices_clone" => ["id" => "customers"],
+                    ],
                     [
                     'customers.id',
                     'customers.name',
