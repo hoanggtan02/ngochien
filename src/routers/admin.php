@@ -326,6 +326,86 @@
             }
         })->setPermissions(['blockip.deleted']);
 
+        //transpost start
+
+        $app->router('/transport', ['GET', 'POST'], function($vars) use ($app, $jatbi, $setting) {
+            $jatbi->permission('transport');
+            $vars['title'] = $jatbi->lang("Quản lý Vận chuyển");
+
+            if ($app->method() === 'GET') {
+                echo $app->render($setting['template'] . '/admin/transport.html', $vars);
+            } 
+            elseif ($app->method() === 'POST') {
+                $app->header(['Content-Type' => 'application/json']);
+                $draw = isset($_POST['draw']) ? intval($_POST['draw']) : 0;
+                $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
+                $length = isset($_POST['length']) ? intval($_POST['length']) : 10;
+                $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
+                $statusValue = isset($_POST['status']) ? $_POST['status'] : '';
+
+                $orderName = isset($_POST['order'][0]['name']) ? $_POST['order'][0]['name'] : 'id';
+                $orderDir = isset($_POST['order'][0]['dir']) ? $_POST['order'][0]['dir'] : 'DESC';
+
+                $where = [
+                    "AND" => [
+                        "deleted" => 0,
+                    ],
+                    "LIMIT" => [$start, $length],
+                    "ORDER" => [$orderName => strtoupper($orderDir)]
+                ];
+
+                if ($searchValue != '') {
+                    $where['AND']['name[~]'] = $searchValue;
+                }
+
+                if ($statusValue != '') {
+                    $where['AND']['status'] = $statusValue;
+                } else {
+                    $where['AND']['status'] = ['A', 'D'];
+                }
+
+                $count = $app->count("transport", ["AND" => $where['AND']]);
+                
+                $datas = [];
+                $app->select("transport", "*", $where, function ($data) use (&$datas, $jatbi, $app) {
+                    $datas[] = [
+                        "checkbox" => $app->component("box", ["data" => $data['active']]),
+                        "name" => $data['name'],
+                        "status" => $app->component("status", [
+                            "url" => "/admin/transport-status/" . $data['active'],
+                            "data" => $data['status'],
+                            "permission" => ['transport.edit']
+                        ]),
+                        "action" => $app->component("action", [
+                            "button" => [
+                                [
+                                    'type' => 'button',
+                                    'name' => $jatbi->lang("Sửa"),
+                                    'permission' => ['transport.edit'],
+                                    'action' => ['data-url' => '/admin/transport-edit/' . $data['active'], 'data-action' => 'modal']
+                                ],
+                                [
+                                    'type' => 'button',
+                                    'name' => $jatbi->lang("Xóa"),
+                                    'permission' => ['transport.deleted'],
+                                    'action' => ['data-url' => '/admin/transport-deleted?box=' . $data['active'], 'data-action' => 'modal']
+                                ],
+                            ]
+                        ]),
+                    ];
+                });
+                echo json_encode([
+                    "draw" => $draw,
+                    "recordsTotal" => $count,
+                    "recordsFiltered" => $count,
+                    "data" => $datas ?? []
+                ]);
+            }
+        })->setPermissions(['transport']);
+        //tranpost end
+
+
+
         $app->router("/blockip", ['GET','POST'], function($vars) use ($app, $jatbi,$setting) {
             $vars['title'] = $jatbi->lang("Chặn truy cập");
             if($app->method()==='GET'){

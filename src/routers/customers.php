@@ -46,6 +46,7 @@
                         "[>]customers_types" => ["type" => "id"],
                         "[>]accounts" => ["user" => "id"],
                         //"[>]invoices_clone" => ["id" => "customers"],
+
                     ], 
                     [
                     'customers.id',
