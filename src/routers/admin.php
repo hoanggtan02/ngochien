@@ -327,7 +327,6 @@
         })->setPermissions(['blockip.deleted']);
 
         //transpost start
-
         $app->router('/transport', ['GET', 'POST'], function($vars) use ($app, $jatbi, $setting) {
             $jatbi->permission('transport');
             $vars['title'] = $jatbi->lang("Quản lý Vận chuyển");
@@ -367,12 +366,15 @@
                 $count = $app->count("transport", ["AND" => $where['AND']]);
                 
                 $datas = [];
-                $app->select("transport", "*", $where, function ($data) use (&$datas, $jatbi, $app) {
+                $app->select("transport", "*", $where, function ($data) use (&$datas, $jatbi, $app,$setting) {
                     $datas[] = [
-                        "checkbox" => $app->component("box", ["data" => $data['active']]),
+                        "checkbox" => $app->component("box", ["data" => $data['id']]),
                         "name" => $data['name'],
+                        // "type" => $api_transports[$data['type']]['name'],
+                        "type" => $setting["api"][$data['type']]['name'],
+                        "notes" => $data['notes'],
                         "status" => $app->component("status", [
-                            "url" => "/admin/transport-status/" . $data['active'],
+                            "url" => "/admin/transport-status/" . $data['id'],
                             "data" => $data['status'],
                             "permission" => ['transport.edit']
                         ]),
@@ -382,13 +384,13 @@
                                     'type' => 'button',
                                     'name' => $jatbi->lang("Sửa"),
                                     'permission' => ['transport.edit'],
-                                    'action' => ['data-url' => '/admin/transport-edit/' . $data['active'], 'data-action' => 'modal']
+                                    'action' => ['data-url' => '/admin/transport-edit/' . $data['id'], 'data-action' => 'modal']
                                 ],
                                 [
                                     'type' => 'button',
                                     'name' => $jatbi->lang("Xóa"),
                                     'permission' => ['transport.deleted'],
-                                    'action' => ['data-url' => '/admin/transport-deleted?box=' . $data['active'], 'data-action' => 'modal']
+                                    'action' => ['data-url' => '/admin/transport-deleted?box=' . $data['id'], 'data-action' => 'modal']
                                 ],
                             ]
                         ]),
@@ -404,6 +406,81 @@
         })->setPermissions(['transport']);
         //tranpost end
 
+        //flood start
+    $app->router('/flood', ['GET', 'POST'], function($vars) use ($app, $jatbi, $setting) {
+        $jatbi->permission('flood');
+        $vars['title'] = $jatbi->lang("Danh sách chặn");
+        if ($app->method() === 'GET') {
+            echo $app->render($setting['template'] . '/admin/flood.html', $vars);
+        } 
+        elseif ($app->method() === 'POST') {
+            $app->header(['Content-Type' => 'application/json']);
+
+            $draw = isset($_POST['draw']) ? intval($_POST['draw']) : 0;
+            $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
+            $length = isset($_POST['length']) ? intval($_POST['length']) : 10;
+            $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
+            
+            $dateRange = isset($_POST['date']) ? $_POST['date'] : '';
+            $orderName = isset($_POST['order'][0]['name']) ? $_POST['order'][0]['name'] : 'id';
+            $orderDir = isset($_POST['order'][0]['dir']) ? $_POST['order'][0]['dir'] : 'DESC';
+
+            $where = [
+                "AND" => [
+                    "OR" => [
+                        'ip[~]' => $searchValue,
+                        'browsers[~]' => $searchValue,
+                        ],
+                    ],
+                    "LIMIT" => [$start, $length],
+                    "ORDER" => [$orderName => strtoupper($orderDir)]
+                ];
+
+
+            if ($dateRange != '') {
+                $date = explode(' - ', $dateRange);
+                $date_from = date('Y-m-d H:i:s', strtotime(str_replace('/', '-', $date[0])));
+                $date_to = date('Y-m-d 23:59:59', strtotime(str_replace('/', '-', $date[1])));
+                $where['AND']["date[<>]"] = [$date_from, $date_to];
+            }
+            
+
+            $count = $app->count("flood", ["AND" => $where['AND']]);
+            $datas = [];
+            $app->select("flood", "*", $where, function ($data) use (&$datas, $jatbi, $app) {
+                $datas[] = [
+                    "checkbox" => $app->component("box", ["data" => $data['id']]),
+                    "date" => date("d/m/Y H:i:s", strtotime($data['date'])),
+                    "ip" => $data['ip'],
+                    "browsers" => $data['browsers'],
+                    "action" => $app->component("action", [
+                        "button" => [
+                            [
+                                'type' => 'button',
+                                'name' => $jatbi->lang("Xem"),
+                                'permission' => ['flood'], 
+                                'action' => ['data-url' => '/admin/flood-views/' . $data['id'], 'data-action' => 'modal']
+                            ],
+                            [
+                                'type' => 'button',
+                                'name' => $jatbi->lang("Xóa"),
+                                'permission' => ['flood.delete'], 
+                                'action' => ['data-url' => '/admin/flood-delete?box=' . $data['id'], 'data-action' => 'modal']
+                            ],
+                        ]
+                    ]),
+                ];
+            });
+
+            echo json_encode([
+                "draw" => $draw,
+                "recordsTotal" => $count,
+                "recordsFiltered" => $count,
+                "data" => $datas ?? []
+            ]);
+        }
+    })->setPermissions(['flood']); 
+        //flood end
 
 
         $app->router("/blockip", ['GET','POST'], function($vars) use ($app, $jatbi,$setting) {

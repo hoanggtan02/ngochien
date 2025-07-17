@@ -2,7 +2,23 @@
 if (!defined('ECLO')) die("Hacking attempt");
 
 $env = parse_ini_file(__DIR__ . '/../.env');
-
+$api_transports = [
+    "1" => [
+        "id" => 1,
+        "name" =>"Không Tích Hợp",
+        "code" => 'KTH',
+        "logo" => '',
+    ],
+    "2" => [
+        "id" => 2,
+        "name" => "Giao Hàng Nhanh",
+        "code" => 'GHN',
+        "logo" => '',
+        "API" => [
+            "token" => 'Token',
+        ],
+    ],
+];
 return [
     "db" => [
         'type'      => $env['DB_TYPE'] ?? 'mysql',
@@ -35,5 +51,6 @@ return [
         "lang"       => $_COOKIE['lang'] ?? 'vi',
         "plugins"    => '../plugins',
         "uploads"    => '../datas',
-    ]
+        "api"        => $api_transports,
+        ]
 ];
