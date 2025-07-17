@@ -104,6 +104,43 @@ $requests = [
                     'permission.deleted' => $jatbi->lang("Xóa Nhóm quyền"),
                 ]
             ],
+            'areas' => [
+                "menu" => $jatbi->lang("Khu vực"),
+                "url" => '/areas/province/',
+				"icon"=>'<i class="ti ti-map"></i>',
+                "sub" => [
+                    'province'		=>[
+						"name"	=> $jatbi->lang("Tỉnh thành"),
+						"router"=> 'province',
+						"icon"	=> '<i class="fas fa-city"></i>',
+					],
+					'district'		=>[
+						"name"	=> $jatbi->lang("Quận huyện"),
+						"router"=> 'district',
+						"icon"	=> '<i class="fas fa-archway"></i>',
+					],
+					'ward'		=>[
+						"name"	=> $jatbi->lang("Phường xã"),
+						"router"=> 'ward',
+						"icon"	=> '<i class="fas fa-road"></i>',
+					], 
+                ],
+                "main" => 'false',
+                "permission" => [
+                    'province' => $jatbi->lang("Tỉnh thành"),
+                    'province.add' => $jatbi->lang("Thêm Tỉnh thành"),
+                    'province.edit' => $jatbi->lang("Sửa Tỉnh thành"),
+                    'province.deleted' => $jatbi->lang("Xóa Tỉnh thành"),
+                    'district' => $jatbi->lang("Quận huyện"),
+                    'district.add' => $jatbi->lang("Thêm Quận huyện"),
+                    'district.edit' => $jatbi->lang("Sửa Quận huyện"),
+                    'district.deleted' => $jatbi->lang("Xóa Quận huyện"),
+                    'ward' => $jatbi->lang("Phường xã"),
+                    'ward.add' => $jatbi->lang("Thêm Phường xã"),
+                    'ward.edit' => $jatbi->lang("Sửa Phường xã"),
+                    'ward.deleted' => $jatbi->lang("Xóa Phường xã"),
+                ]
+            ],
             'admin' => [
                 "menu" => $jatbi->lang("Quản trị"),
                 "url" => '/admin',
@@ -113,6 +150,11 @@ $requests = [
                         "name" => $jatbi->lang("Tiện ích mở rộng"),
                         "router" => '/admin/plugins',
                         "icon" => '<i class="fas fa-plugin"></i>',
+                    ],
+                    'coupons' => [
+                        "name" => $jatbi->lang("Thẻ quà tặng"),
+                        "router" => '/admin/coupons',
+                        "icon" => '<i class="fas fa-ticket-alt"></i>',
                     ],
                     'transport' => [
                         "name" => $jatbi->lang("Vận chuyển"),
@@ -167,6 +209,7 @@ $requests = [
                     'config' => $jatbi->lang("Cấu hình"),
                     'logs' => $jatbi->lang("Nhật ký"),
                     'trash' => $jatbi->lang("Thùng rác"),
+                    'coupons' => $jatbi->lang("Thẻ quà tặng"),
                 ]
             ],
         ],
