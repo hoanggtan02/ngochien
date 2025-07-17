@@ -1,5 +1,4 @@
 <div class="container">
-    <!-- Header: Title and Breadcrumbs -->
     <div class="mb-3 d-flex justify-content-between align-items-center">
         <div>
             <h4 class="mb-0 fw-bold text-body"><?=$title?></h4>
@@ -12,7 +11,6 @@
         </div>
         <div class="filter-search">
             <div class="d-flex align-items-center justify-content-end">
-                <!-- Filter Dropdown -->
                 <div class="dropdown">
                     <button class="btn btn-eclo-light fw-semibold border-0 rounded-pill small d-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside" >
                         <i class="ti ti-filter fs-5 me-2"></i> <?=$jatbi->lang("Điều kiện lọc")?>
@@ -23,10 +21,10 @@
                         </div>
                         <hr class="border-secondary border-opacity-50 my-2">
                         <div class="px-3">
-                            <!-- Status Filter Component -->
-                            <?=$app->component('select-status',[
-                                "value" => $app->xss($_GET['status'] ?? ''),
-                            ])?>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold ms-1"><?=$jatbi->lang('Ngày')?></label>
+                                <input type="text" class="form-control daterange-select" name="date" value="">
+                            </div>
                         </div>
                         <hr class="border-secondary border-opacity-50 my-2">
                         <div class="px-3 py-2 text-end w-100">
@@ -39,34 +37,21 @@
         </div>
     </div>
 
-    <!-- Floating Action Button for Add/Delete -->
-    <?php if($jatbi->permission(['transport.deleted']) == 'true' || $jatbi->permission(['transport.add']) == 'true'){ ?>
+    <?php if($jatbi->permission(['flood.delete']) == 'true'){ ?>
     <div class="position-fixed bottom right z-3 dropup-center dropup" style="--bottom:40px;--right:20px">
         <button class="btn btn-eclo rounded-circle width height d-flex align-items-center justify-content-center " style="--width:70px;--height:70px;" data-bs-toggle="dropdown" aria-expanded="false">
             <i class="ti ti-menu-2 fs-2" aria-hidden="true"></i>
         </button>
         <ul class="dropdown-menu min-width bg-transparent border-0 justify-content-center p-2" style="--min-width:100%">
-            <!-- Delete Button -->
-            <?php if($jatbi->permission(['transport.deleted']) == 'true'){ ?>
             <li class="my-2">
-                <a class="btn rounded-circle btn-danger width height d-flex justify-content-center align-items-center p-1" data-action="modal" data-checkbox="input.checker" data-url="<?=$jatbi->url('/admin/transport-deleted')?>" style="--width:50px;--height:50px;">
+                <a class="btn rounded-circle btn-danger width height d-flex justify-content-center align-items-center p-1" data-action="modal" data-checkbox="input.checker" data-url="<?=$jatbi->url('/admin/flood-delete')?>" style="--width:50px;--height:50px;">
                     <i class="ti ti-trash fs-3" aria-hidden="true"></i>
                 </a>
             </li>
-            <?php } ?>
-            <!-- Add Button -->
-            <?php if($jatbi->permission(['transport.add']) == 'true'){ ?>
-            <li class="my-2">
-                <a class="btn rounded-circle btn-warning width height d-flex justify-content-center align-items-center p-1" data-action="modal" data-url="<?=$jatbi->url('/admin/transport-add')?>" style="--width:50px;--height:50px;">
-                    <i class="ti ti-plus fs-3" aria-hidden="true"></i>
-                </a>
-            </li>
-            <?php } ?>
-        </ul>
+            </ul>
     </div>
     <?php } ?>
 
-    <!-- DataTables Card -->
     <div class="card bg-body bg-opacity-50 shadow border-0 rounded-4">
         <div class="card-body">
            <div class="custom-buttons d-none">
@@ -85,10 +70,9 @@
                 <thead>
                     <tr>
                         <th data-name="checkbox" data-orderable="false" class="text-nowrap" data-visible="true" data-class="text-center"><div class="form-check"><input class="form-check-input checkall" type="checkbox" value="" data-checkbox="input.checker"></div></th>
-                        <th data-name="name" data-orderable="true" class="text-nowrap text-start" data-visible="true" data-class=""><?=$jatbi->lang("Tên")?></th>
-                        <th data-name="type" data-orderable="true" class="text-nowrap text-start" data-visible="true" data-class=""><?=$jatbi->lang("Tích Hợp")?></th>
-                        <th data-name="notes" data-orderable="true" class="text-nowrap text-start" data-visible="true" data-class=""><?=$jatbi->lang("Ghi chú")?></th>
-                        <th data-name="status" data-orderable="false" class="text-nowrap" data-visible="true" data-class="text-center"><?=$jatbi->lang("Trạng thái")?></th>
+                        <th data-name="date" data-orderable="true" class="text-nowrap text-start" data-visible="true" data-class=""><?=$jatbi->lang("Ngày")?></th>
+                        <th data-name="ip" data-orderable="true" class="text-nowrap text-start" data-visible="true" data-class=""><?=$jatbi->lang("IP")?></th>
+                        <th data-name="browsers" data-orderable="true" class="text-nowrap text-start" data-visible="true" data-class=""><?=$jatbi->lang("Trình duyệt")?></th>
                         <th data-name="action" data-orderable="false" class="text-nowrap" data-visible="true" data-class="text-end"><?=$jatbi->lang("Tùy chọn")?></th>
                     </tr>
                 </thead>

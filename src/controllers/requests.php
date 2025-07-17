@@ -118,6 +118,11 @@ $requests = [
                         "name" => $jatbi->lang("Vận chuyển"),
                         "router" => '/admin/transport',
                         "icon" => '<i class="fas fa-shipping-fast"></i>',
+                    ],                    
+                    'flood' => [
+                        "name" => $jatbi->lang("Danh sách chặn"),
+                        "router" => '/admin/flood',
+                        "icon" => '<i class="fas fa-shield-alt"></i>',
                     ],
                     'blockip' => [
                         "name" => $jatbi->lang("Chặn truy cập"),
@@ -151,6 +156,10 @@ $requests = [
                     'transport.add' => $jatbi->lang("Thêm Vận chuyển"),
                     'transport.edit' => $jatbi->lang("Sửa Vận chuyển"),
                     'transport.deleted' => $jatbi->lang("Xóa Vận chuyển"),
+                    'flood' => $jatbi->lang("Danh Sách Chặn"),
+                    'flood.add' => $jatbi->lang("Thêm Danh Sách Chặn"),
+                    'flood.edit' => $jatbi->lang("Sửa Danh Sách Chặn"),
+                    'flood.deleted' => $jatbi->lang("Xóa Danh Sách Chặn"),
                     'blockip' => $jatbi->lang("Chặn truy cập"),
                     'blockip.add' => $jatbi->lang("Thêm Chặn truy cập"),
                     'blockip.edit' => $jatbi->lang("Sửa Chặn truy cập"),
@@ -160,6 +169,23 @@ $requests = [
                     'trash' => $jatbi->lang("Thùng rác"),
                 ]
             ],
+        ],
+    ],
+];
+$api_transports = [
+    "1" => [
+        "id" => 1,
+        "name" => $jatbi->lang("Không Tích Hợp"),
+        "code" => 'KTH',
+        "logo" => '',
+    ],
+    "2" => [
+        "id" => 2,
+        "name" => $jatbi->lang("Giao Hàng Nhanh"),
+        "code" => 'GHN',
+        "logo" => '',
+        "API" => [
+            "token" => 'Token',
         ],
     ],
 ];
