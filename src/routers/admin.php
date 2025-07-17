@@ -407,80 +407,161 @@
         //tranpost end
 
         //flood start
-    $app->router('/flood', ['GET', 'POST'], function($vars) use ($app, $jatbi, $setting) {
-        $jatbi->permission('flood');
-        $vars['title'] = $jatbi->lang("Danh sách chặn");
-        if ($app->method() === 'GET') {
-            echo $app->render($setting['template'] . '/admin/flood.html', $vars);
-        } 
-        elseif ($app->method() === 'POST') {
-            $app->header(['Content-Type' => 'application/json']);
+        $app->router('/flood', ['GET', 'POST'], function($vars) use ($app, $jatbi, $setting) {
+            $jatbi->permission('flood');
+            $vars['title'] = $jatbi->lang("Danh sách chặn");
+            if ($app->method() === 'GET') {
+                echo $app->render($setting['template'] . '/admin/flood.html', $vars);
+            } 
+            elseif ($app->method() === 'POST') {
+                $app->header(['Content-Type' => 'application/json']);
 
-            $draw = isset($_POST['draw']) ? intval($_POST['draw']) : 0;
-            $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
-            $length = isset($_POST['length']) ? intval($_POST['length']) : 10;
-            $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
-            
-            $dateRange = isset($_POST['date']) ? $_POST['date'] : '';
-            $orderName = isset($_POST['order'][0]['name']) ? $_POST['order'][0]['name'] : 'id';
-            $orderDir = isset($_POST['order'][0]['dir']) ? $_POST['order'][0]['dir'] : 'DESC';
+                $draw = isset($_POST['draw']) ? intval($_POST['draw']) : 0;
+                $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
+                $length = isset($_POST['length']) ? intval($_POST['length']) : 10;
+                $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
+                
+                $dateRange = isset($_POST['date']) ? $_POST['date'] : '';
+                $orderName = isset($_POST['order'][0]['name']) ? $_POST['order'][0]['name'] : 'id';
+                $orderDir = isset($_POST['order'][0]['dir']) ? $_POST['order'][0]['dir'] : 'DESC';
 
-            $where = [
-                "AND" => [
-                    "OR" => [
-                        'ip[~]' => $searchValue,
-                        'browsers[~]' => $searchValue,
+                $where = [
+                    "AND" => [
+                        "OR" => [
+                            'ip[~]' => $searchValue,
+                            'browsers[~]' => $searchValue,
+                            ],
                         ],
-                    ],
-                    "LIMIT" => [$start, $length],
-                    "ORDER" => [$orderName => strtoupper($orderDir)]
-                ];
+                        "LIMIT" => [$start, $length],
+                        "ORDER" => [$orderName => strtoupper($orderDir)]
+                    ];
 
 
-            if ($dateRange != '') {
-                $date = explode(' - ', $dateRange);
-                $date_from = date('Y-m-d H:i:s', strtotime(str_replace('/', '-', $date[0])));
-                $date_to = date('Y-m-d 23:59:59', strtotime(str_replace('/', '-', $date[1])));
-                $where['AND']["date[<>]"] = [$date_from, $date_to];
+                if ($dateRange != '') {
+                    $date = explode(' - ', $dateRange);
+                    $date_from = date('Y-m-d H:i:s', strtotime(str_replace('/', '-', $date[0])));
+                    $date_to = date('Y-m-d 23:59:59', strtotime(str_replace('/', '-', $date[1])));
+                    $where['AND']["date[<>]"] = [$date_from, $date_to];
+                }
+                
+
+                $count = $app->count("flood", ["AND" => $where['AND']]);
+                $datas = [];
+                $app->select("flood", "*", $where, function ($data) use (&$datas, $jatbi, $app) {
+                    $datas[] = [
+                        "checkbox" => $app->component("box", ["data" => $data['id']]),
+                        "date" => date("d/m/Y H:i:s", strtotime($data['date'])),
+                        "ip" => $data['ip'],
+                        "browsers" => $data['browsers'],
+                        "action" => $app->component("action", [
+                            "button" => [
+                                [
+                                    'type' => 'button',
+                                    'name' => $jatbi->lang("Xem"),
+                                    'permission' => ['flood'], 
+                                    'action' => ['data-url' => '/admin/flood-views/' . $data['id'], 'data-action' => 'modal']
+                                ],
+                                [
+                                    'type' => 'button',
+                                    'name' => $jatbi->lang("Xóa"),
+                                    'permission' => ['flood.delete'], 
+                                    'action' => ['data-url' => '/admin/flood-delete?box=' . $data['id'], 'data-action' => 'modal']
+                                ],
+                            ]
+                        ]),
+                    ];
+                });
+
+                echo json_encode([
+                    "draw" => $draw,
+                    "recordsTotal" => $count,
+                    "recordsFiltered" => $count,
+                    "data" => $datas ?? []
+                ]);
             }
-            
-
-            $count = $app->count("flood", ["AND" => $where['AND']]);
-            $datas = [];
-            $app->select("flood", "*", $where, function ($data) use (&$datas, $jatbi, $app) {
-                $datas[] = [
-                    "checkbox" => $app->component("box", ["data" => $data['id']]),
-                    "date" => date("d/m/Y H:i:s", strtotime($data['date'])),
-                    "ip" => $data['ip'],
-                    "browsers" => $data['browsers'],
-                    "action" => $app->component("action", [
-                        "button" => [
-                            [
-                                'type' => 'button',
-                                'name' => $jatbi->lang("Xem"),
-                                'permission' => ['flood'], 
-                                'action' => ['data-url' => '/admin/flood-views/' . $data['id'], 'data-action' => 'modal']
-                            ],
-                            [
-                                'type' => 'button',
-                                'name' => $jatbi->lang("Xóa"),
-                                'permission' => ['flood.delete'], 
-                                'action' => ['data-url' => '/admin/flood-delete?box=' . $data['id'], 'data-action' => 'modal']
-                            ],
-                        ]
-                    ]),
-                ];
-            });
-
-            echo json_encode([
-                "draw" => $draw,
-                "recordsTotal" => $count,
-                "recordsFiltered" => $count,
-                "data" => $datas ?? []
-            ]);
-        }
-    })->setPermissions(['flood']); 
+        })->setPermissions(['flood']); 
         //flood end
+
+        // notification start
+        $app->router('/notification', ['GET', 'POST'], function($vars) use ($app, $jatbi, $setting) {
+            $jatbi->permission('notification');
+           $vars['title'] = $jatbi->lang("Thông Báo");
+            if ($app->method() === 'GET') {
+                echo $app->render($setting['template'] . '/admin/notification.html', $vars);
+            } 
+            elseif ($app->method() === 'POST') {
+               $app->header(['Content-Type' => 'application/json']);
+
+                $draw = isset($_POST['draw']) ? intval($_POST['draw']) : 0;
+                $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
+                $length = isset($_POST['length']) ? intval($_POST['length']) : 10;
+                $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
+                
+                $dateRange = isset($_POST['date']) ? $_POST['date'] : '';
+                $orderName = isset($_POST['order'][0]['name']) ? $_POST['order'][0]['name'] : 'date';
+                $orderDir = isset($_POST['order'][0]['dir']) ? $_POST['order'][0]['dir'] : 'DESC';
+
+
+                $where = [
+                    "AND" => [
+                        "OR" => [
+                            'title[~]' => $searchValue,
+                            'content[~]' => $searchValue,
+                            ],
+                        ],
+                        "LIMIT" => [$start, $length],
+                        "ORDER" => [$orderName => strtoupper($orderDir)]
+                    ];
+
+
+                if ($dateRange != '') {
+                    $date = explode(' - ', $dateRange);
+                    $date_from = date('Y-m-d H:i:s', strtotime(str_replace('/', '-', $date[0])));
+                    $date_to = date('Y-m-d 23:59:59', strtotime(str_replace('/', '-', $date[1])));
+                    $where['AND']["date[<>]"] = [$date_from, $date_to];
+                }
+                
+
+                $count = $app->count("notification", ["AND" => $where['AND']]);
+
+                $datas = [];
+                $app->select("notification", "*", $where, function ($data) use (&$datas, $jatbi, $app) {
+                    $datas[] = [
+                        "checkbox" => $app->component("box", ["data" => $data['id']]),
+
+                        "date"     => date("d/m/Y H:i:s", strtotime($data['date'])),
+                        "title"    => $data['title'],
+                        "content"  => $data['content'],
+                        "url"      => $data['url'],
+                        "views"    => $data['views'],
+                        "action"   => $app->component("action", [
+                            "button" => [
+                                [
+                                    'type'       => 'button',
+                                    'name'       => $jatbi->lang("Xem chi tiết"),
+                                    'permission' => ['notification'], 
+                                    'action'     => ['data-url' => '/admin/notification-view/' . $data['id'], 'data-action' => 'modal']
+                                ],
+                                [
+                                    'type'       => 'button',
+                                    'name'       => $jatbi->lang("Xóa"),
+                                    'permission' => ['notification.delete'], 
+                                    'action'     => ['data-url' => '/admin/notification-delete?box=' . $data['id'], 'data-action' => 'modal-confirm']
+                                ],
+                            ]
+                        ]),
+                    ];
+                });
+
+                echo json_encode([
+                    "draw"            => $draw,
+                    "recordsTotal"    => $count,
+                    "recordsFiltered" => $count,
+                    "data"            => $datas ?? []
+                ]);
+            }})->setPermissions(['notification']); 
+        // notification end
+
 
 
         $app->router("/blockip", ['GET','POST'], function($vars) use ($app, $jatbi,$setting) {

@@ -176,6 +176,11 @@ $requests = [
                         "router" => '/admin/blockip',
                         "icon" => '<i class="fas fa-ban"></i>',
                     ],
+                    'notification' => [
+                        "name" => $jatbi->lang("Thông báo"),
+                        "router" => '/admin/notification',
+                        "icon" => '<i class="fas fa-bell"></i>',
+                    ],
                     'trash' => [
                         "name" => $jatbi->lang("Thùng rác"),
                         "router" => '/admin/trash',
@@ -211,6 +216,10 @@ $requests = [
                     'blockip.add' => $jatbi->lang("Thêm Chặn truy cập"),
                     'blockip.edit' => $jatbi->lang("Sửa Chặn truy cập"),
                     'blockip.deleted' => $jatbi->lang("Xóa Chặn truy cập"),
+                    'notification' => $jatbi->lang("Thông Báo"),
+                    'notification.add' => $jatbi->lang("Thêm Chặn Thông Báo"),
+                    'notification.edit' => $jatbi->lang("Sửa Chặn Thông Báo"),
+                    'notification.deleted' => $jatbi->lang("Xóa Chặn Thông Báo"),
                     'config' => $jatbi->lang("Cấu hình"),
                     'logs' => $jatbi->lang("Nhật ký"),
                     'trash' => $jatbi->lang("Thùng rác"),
@@ -241,4 +250,4 @@ $api_transports = [
         ],
     ],
 ];
-?>
+?>  
