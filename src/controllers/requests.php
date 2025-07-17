@@ -111,17 +111,17 @@ $requests = [
                 "sub" => [
                     'province'		=>[
 						"name"	=> $jatbi->lang("Tỉnh thành"),
-						"router"=> 'province',
+						"router"=> '/areas/province',
 						"icon"	=> '<i class="fas fa-city"></i>',
 					],
 					'district'		=>[
 						"name"	=> $jatbi->lang("Quận huyện"),
-						"router"=> 'district',
+						"router"=> '/areas/district',
 						"icon"	=> '<i class="fas fa-archway"></i>',
 					],
 					'ward'		=>[
 						"name"	=> $jatbi->lang("Phường xã"),
-						"router"=> 'ward',
+						"router"=> '/areas/ward',
 						"icon"	=> '<i class="fas fa-road"></i>',
 					], 
                 ],
