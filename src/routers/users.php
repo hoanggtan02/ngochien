@@ -137,6 +137,8 @@
                     ],
                 ];
                 $session = $app->getSession("accounts");
+                $sessionStores = $app->getSession("stores");
+                $Search_ACC = [];
                 $account = [];
 
                 if (isset($session['id'])) {
@@ -146,11 +148,19 @@
                         "status" => "A",
                     ]);
 
-                    // Khởi tạo biến $accStore như source cũ
-                    $accStore = [];
-                    $stores = $app->select("stores", "*", ["deleted" => 0]);
+                    if($sessionStores!=0){
+                        $stores = $app->select("stores",["id","name","code"],["deleted"=> 0,"status"=>'A',"id"=>$sessionStores]);
+                    }
+                    else {
+                        if($account['stores']==''){
+                            $stores = $app->select("stores",["id","name","code"],["deleted"=> 0,"status"=>'A']);
+                        }
+                        else {
+                            $stores = $app->select("stores",["id","name","code"],["deleted"=> 0,"status"=>'A',"id"=>unserialize($account['stores'])]);
+                        }
+                    }
                     foreach ($stores as $itemStore) {
-                        if ($account['stores'] == '') {
+                        if($account['stores']==''){
                             $accStore[0] = "0";
                         }
                         $accStore[$itemStore['id']] = $itemStore['id'];
@@ -171,14 +181,17 @@
                 ], $where);
 
                 foreach ($Accsearchs as $key => $search) {
-                    if($account['stores']=='' && $_SESSION['stores']==0){
+                    if($account['stores']=='' && $sessionStores==0){
                         $Search_ACC[$search['id']] = $search['id'];
                     }
                     else {
-                        $getACCStores[$search['id']] = unserialize($search['stores']);
-                        foreach ($getACCStores[$search['id']] as $key => $value) {
-                            if($accStore[$value]==$value){
-                                $Search_ACC[$search['id']] = $search['id'];
+                        // Kiểm tra $search['stores'] trước khi unserialize
+                        $storesData = $search['stores'] && is_string($search['stores']) && $search['stores'] !== '' ? unserialize($search['stores']) : [];
+                        if (is_array($storesData)) {
+                            foreach ($storesData as $value) {
+                                if (isset($accStore[$value]) && $accStore[$value] == $value) {
+                                    $Search_ACC[$search['id']] = $search['id'];
+                                }
                             }
                         }
                     }
@@ -186,12 +199,12 @@
                 }
                 $where1 = [
                     "AND" => [
+                        "accounts.id" => $Search_ACC,
                         "OR" => [
                             "accounts.name[~]" => $searchValue,
                             "accounts.email[~]" => $searchValue,
                             "accounts.account[~]" => $searchValue,
                         ],
-                        "accounts.id" => $Search_ACC,
                         "accounts.deleted" => 0,
                         "accounts.status[<>]" => $status,
                         "accounts.type" => 10, // Chỉ lấy tài khoản đối tác
@@ -202,12 +215,12 @@
 
                 $where2 = [
                     "AND" => [
+                        "accounts.id" => $Search_ACC,
                         "OR" => [
                             "accounts.name[~]" => $searchValue,
                             "accounts.email[~]" => $searchValue,
                             "accounts.account[~]" => $searchValue,
                         ],
-                        "accounts.id" => $Search_ACC,
                         "accounts.deleted" => 0,
                         "accounts.status[<>]" => $status,
                         "accounts.type" => 10, // Chỉ lấy tài khoản đối tác

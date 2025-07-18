@@ -63,20 +63,17 @@
                         "token" => $payload['token'],
                         "active" => $data['active'],
                     ]);
-                    // Lấy danh sách store còn hoạt động
-                    $ListStoreCount = $app->select("stores", "*", ["deleted"=> 0, "status"=> "A"]);
-                    if(count($ListStoreCount) > 1){
-                        if($data['stores'] == "" || count(unserialize($data['stores'])) > 1){
+
+                    // Thêm logic gán $_SESSION['stores']
+                    $ListStoreCount = $app->count("stores", "id", ["deleted" => 0, "status" => 'A']);
+                    if ($ListStoreCount > 1) {
+                        if ($data['stores'] == "" || count(unserialize($data['stores'])) > 1) {
                             $app->setSession('stores', 0);
+                        } else {
+                            $app->setSession('stores', unserialize($data['stores'])[0]);
                         }
-                        else {
-                            $stores = unserialize($data['stores']);
-                            $app->setSession('stores', $stores[0]);
-                        }
-                    }
-                    else {
-                        $storeId = $app->get("stores", "id", ["deleted"=> 0, "status"=> "A"]);
-                        $app->setSession('stores', $storeId);
+                    } else {
+                        $app->setSession('stores', $app->get("stores", "id", ["deleted" => 0, "status" => 'A']));
                     }
 
                     if($app->xss($_POST['remember'] ?? '' )){
