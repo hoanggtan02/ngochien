@@ -100,6 +100,134 @@
                 ]);
             }
         });
+        // accounts-partner start
+        $app->router('/accounts-partner', ['GET', 'POST'], function($vars) use ($app, $jatbi, $setting) {
+            $jatbi->permission('accounts-partner');
+            $vars['title'] = $jatbi->lang("Tài Khoản Đối Tác");
+
+            if ($app->method() === 'GET') {
+                echo $app->render($setting['template'].'/users/accounts-partner.html', $vars);
+            }
+
+            if ($app->method() === 'POST') {
+                $app->header(['Content-Type' => 'application/json']);
+
+                $draw = isset($_POST['draw']) ? intval($_POST['draw']) : 0;
+                $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
+                $length = isset($_POST['length']) ? intval($_POST['length']) : $setting['site_page'];
+                $searchValue = isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '';
+                $filter_permission = isset($_POST['permission']) ? $_POST['permission'] : '';
+                $filter_status = isset($_POST['status']) ? $_POST['status'] : '';
+                $orderColumnIndex = $_POST['order'][0]['column'] ?? 0;
+                $orderColumnName = $_POST['columns'][$orderColumnIndex]['name'] ?? 'id';
+                $orderDir = $_POST['order'][0]['dir'] ?? 'DESC';
+
+                $allowedAccountIds = [];
+                // $isSuperAdmin = ($account['stores'] == '' && ($_SESSION['stores'] ?? 0) == 0);
+
+                // if (!$isSuperAdmin) {
+                //     $allPartners = $app->select("accounts", ["id", "stores"], ["type" => 10, "deleted" => 0]);
+                //     foreach ($allPartners as $partner) {
+                //         $partnerStores = @unserialize($partner['stores']);
+                //         if (is_array($partnerStores)) {
+                //             foreach ($partnerStores as $storeId) {
+                //                 if (isset($accStore[$storeId])) {
+                //                     $allowedAccountIds[] = $partner['id'];
+                //                     break;
+                //                 }
+                //             }
+                //         }
+                //     }
+                //     if (empty($allowedAccountIds)) {
+                //         $allowedAccountIds = [0];
+                //     }
+                // }
+
+                $where = [
+                    "AND" => [
+                        // "OR" => [
+                        //     "name[~]" => $searchValue,
+                        //     "account[~]" => $searchValue,
+                        //     "email[~]" => $searchValue,
+                        // ],
+                        // "type" => 10,
+                        // "deleted" => 0,
+                    ],
+                    // "LIMIT" => [$start, $length],
+                    // "ORDER" => [$orderColumnName => strtoupper($orderDir)]
+                ];
+
+                // if (!$isSuperAdmin) {
+                //     $where['AND']['id'] = $allowedAccountIds;
+                // }
+
+                // if (!empty($filter_permission)) {
+                //     $where['AND']['permission'] = $filter_permission;
+                // } else {
+                //     unset($where['AND']['permission']);
+                // }
+
+                // if (!empty($filter_status)) {
+                //     $where['AND']['status[<>]'] = [$filter_status, $filter_status];
+                // } else {
+                //     $where['AND']['status[<>]'] = ['A', 'D'];
+                // }
+
+                $baseWhere = [
+                    "type" => 10,
+                    "deleted" => 0,
+                ];
+
+                // if (!$isSuperAdmin) {
+                //     $baseWhere['id'] = $allowedAccountIds;
+                // }
+
+                $recordsTotal = $app->count("accounts", $baseWhere);
+
+                if (count($where['AND']) > count($baseWhere)) {
+                    $recordsFiltered = $app->count("accounts", $where['AND']);
+                } else {
+                    $recordsFiltered = $recordsTotal;
+                }
+
+                $datas = [];
+                $accountsList = $app->select("accounts", "*", $where);
+                var_dump($accountsList);
+
+                foreach ($accountsList as $data) {
+                    $datas[] = [
+                        "checkbox" => $app->component("box", ["data" => $data['id']]),
+                        "name" => $data['name'],
+                        "account" => '<div>' . htmlspecialchars($data['account']) . '</div><small class="text-muted">' . htmlspecialchars($data['email']) . '</small>',
+                        "phone" => $data['phone'],
+                        "status" => $app->component("status", ["data" => $data['status'], "id" => $data['id'], "permission" => "accounts-partner.edit"]),
+                        "action" => $app->component("action", [
+                            "button" => [
+                                [
+                                    'type' => 'button',
+                                    'name' => $jatbi->lang("Chỉnh sửa"),
+                                    'permission' => ['accounts-partner.edit'],
+                                    'action' => ['data-url' => '/admin/accounts-partner-edit/' . $data['id'], 'data-action' => 'modal']
+                                ],
+                                [
+                                    'type' => 'button',
+                                    'name' => $jatbi->lang("Xóa"),
+                                    'permission' => ['accounts-partner.delete'],
+                                    'action' => ['data-url' => '/admin/accounts-partner-delete?id=' . $data['id'], 'data-action' => 'modal-confirm']
+                                ],
+                            ]
+                        ]),
+                    ];
+                }
+                echo json_encode([
+                    "draw" => $draw,
+                    "recordsTotal" => $recordsTotal,
+                    "recordsFiltered" => $recordsFiltered,
+                    "data" => $datas
+                ]);
+            }
+        })->setPermissions(['accounts-partner']);
+        // accounts-partner end
 
         $app->router("/notification/{active}", 'GET', function($vars) use ($app, $jatbi,$setting) {
             $data = $app->get("notifications","*",["active"=>$app->xss($vars['active']),"deleted"=>0,]);
