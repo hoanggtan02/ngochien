@@ -56,6 +56,16 @@ $requests = [
                         "router" => '/customers/config',
                         "icon" => '<i class="fas fa-universal-access"></i>',
                     ],
+                    'customers-card' => [
+                        "name" => $jatbi->lang("Thẻ khách hàng"),
+                        "router" => '/customers/customers-card',
+                        "icon" => '<i class="fas fa-universal-access"></i>',
+                    ],
+                    'sources' => [
+                        "name" => $jatbi->lang("Nguồn kênh"),
+                        "router" => '/customers/sources',
+                        "icon" => '<i class="fas fa-universal-access"></i>',
+                    ],
                 ],
                 "main" => 'false',
                 "permission" => [
@@ -69,6 +79,14 @@ $requests = [
                     'customers.config.add' => $jatbi->lang("Thêm Cấu hình khách hàng"),
                     'customers.config.edit' => $jatbi->lang("Sửa Cấu hình khách hàng"),
                     'customers.config.deleted' => $jatbi->lang("Xóa Cấu hình khách hàng"),
+                    'sources' => $jatbi->lang("Nguồn kênh"),
+                    'sources.add' => $jatbi->lang("Thêm Nguồn kênh"),
+                    'sources.edit' => $jatbi->lang("Sửa Nguồn kênh"),
+                    'sources.deleted' => $jatbi->lang("Xóa Nguồn kênh"),
+                    'customers-card' => $jatbi->lang("Thẻ khách hàng"),
+                    'customers-card.add' => $jatbi->lang("Thêm Thẻ khách hàng"),
+                    'customers-card.edit' => $jatbi->lang("Sửa Thẻ khách hàng"),
+                    'customers-card.deleted' => $jatbi->lang("Xóa Thẻ khách hàng"),
                 ]
             ],
             'hrm' => [
