@@ -1154,5 +1154,161 @@
                 }
             }
         })->setPermissions(['customers.config.deleted']);
+
+        //sources
+       $app->router("/sources", ['GET','POST'], function($vars) use ($app, $jatbi, $setting) {
+            $vars['title'] = $jatbi->lang("Nguồn kênh");
+
+            if ($app->method() === 'GET') {
+                echo $app->render($setting['template'].'/customers/sources.html', $vars);
+            }
+
+            if ($app->method() === 'POST') {
+                $app->header(['Content-Type' => 'application/json']);
+
+                // Lấy tham số từ DataTables
+                $draw = isset($_POST['draw']) ? intval($_POST['draw']) : 0;
+                $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
+                $length = isset($_POST['length']) ? intval($_POST['length']) : $setting['site_page'] ?? 10;
+                $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
+                $orderName = isset($_POST['order'][0]['name']) ? $_POST['order'][0]['name'] : 'id';
+                $orderDir = isset($_POST['order'][0]['dir']) ? $_POST['order'][0]['dir'] : 'DESC';
+                $status = isset($_POST['status']) ? [$_POST['status'],$_POST['status']] : '';
+
+
+                $where = [
+                    "AND" => [
+                        "OR" => [
+                            "name[~]" => $searchValue,
+                        ],
+                        "deleted" => 0,
+                        "status[<>]" => $status,
+                    ],
+                    "LIMIT" => [$start, $length],
+                    "ORDER" => [$orderName => strtoupper($orderDir)],
+                ];
+
+                $count = $app->count("sources", [
+                    "AND" => $where['AND'],
+                ]);
+
+                $datas = [];
+                $app->select("sources", "*", $where, function ($data) use (&$datas, $jatbi, $app) {
+                    $datas[] = [
+                        "checkbox" => $app->component("box", ["data" => $data['id']]),
+                        "name"     => $data['name'],
+                        "notes"    => $data['notes'],
+                        "status"   => $app->component("status", [
+                            "data"       => $data['status'], 
+                            "id"         => $data['id'], 
+                            "permission" => ['sources.edit']
+                        ]),
+                        "action"   => $app->component("action", [
+                            "button" => [
+                                [
+                                    'type'       => 'button',
+                                    'name'       => $jatbi->lang("Sửa"),
+                                    'permission' => ['sources.edit'],
+                                    'action'     => ['data-url' => '/customers/sources-edit/' . $data['id'], 'data-action' => 'modal']
+                                ],
+                                [
+                                    'type'       => 'button',
+                                    'name'       => $jatbi->lang("Xóa"),
+                                    'permission' => ['sources.delete'],
+                                    'action'     => ['data-url' => '/customers/sources-delete?id=' . $data['id'], 'data-action' => 'modal-confirm']
+                                ],
+                            ]
+                        ]),
+                    ];
+                });
+                echo json_encode([
+                    "draw" => $draw,
+                    "recordsTotal" => $count,
+                    "recordsFiltered" => $count,
+                    "data" => $datas ?? [],
+                ]);
+            }
+        })->setPermissions(['sources']);
+        //sources
+
+        //customers-card
+       $app->router("/customers-card", ['GET','POST'], function($vars) use ($app, $jatbi, $setting) {
+            $vars['title'] = $jatbi->lang("Thẻ khách hàng");
+
+            if ($app->method() === 'GET') {
+                echo $app->render($setting['template'].'/customers/customers-card.html', $vars);
+            }
+
+            if ($app->method() === 'POST') {
+                $app->header(['Content-Type' => 'application/json']);
+
+                // Lấy tham số từ DataTables
+                $draw = isset($_POST['draw']) ? intval($_POST['draw']) : 0;
+                $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
+                $length = isset($_POST['length']) ? intval($_POST['length']) : $setting['site_page'] ?? 10;
+                $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
+                $orderName = isset($_POST['order'][0]['name']) ? $_POST['order'][0]['name'] : 'id';
+                $orderDir = isset($_POST['order'][0]['dir']) ? $_POST['order'][0]['dir'] : 'DESC';
+                $status = isset($_POST['status']) ? [$_POST['status'],$_POST['status']] : '';
+
+
+                $where = [
+                    "AND" => [
+                        "OR" => [
+                            "code[~]" => $searchValue,
+                        ],
+                        "deleted" => 0,
+                        "status[<>]" => $status,
+                        //"customers[<>]" => $customers,
+                    ],
+                    "LIMIT" => [$start, $length],
+                    "ORDER" => [$orderName => strtoupper($orderDir)],
+                ];
+
+                $count = $app->count("customers_card", [
+                    "AND" => $where['AND'],
+                ]);
+
+                $datas = [];
+                $app->select("customers_card", "*", $where, function ($data) use (&$datas, $jatbi, $app) {
+                    $datas[] = [
+                        "checkbox" => $app->component("box", ["data" => $data['id']]),
+                        "customers"     => $data['customers'],
+                        "code"          => $data['code'],
+                        "discount"          => $data['discount'],
+                        "notes"          => $data['notes'],
+                        "status"   => $app->component("status", [
+                            "data"       => $data['status'], 
+                            "id"         => $data['id'], 
+                            "permission" => ['sources.edit']
+                        ]),
+                        "action"   => $app->component("action", [
+                            "button" => [
+                                [
+                                    'type'       => 'button',
+                                    'name'       => $jatbi->lang("Sửa"),
+                                    'permission' => ['sources.edit'],
+                                    'action'     => ['data-url' => '/customers/sources-edit/' . $data['id'], 'data-action' => 'modal']
+                                ],
+                                [
+                                    'type'       => 'button',
+                                    'name'       => $jatbi->lang("Xóa"),
+                                    'permission' => ['sources.delete'],
+                                    'action'     => ['data-url' => '/customers/sources-delete?id=' . $data['id'], 'data-action' => 'modal-confirm']
+                                ],
+                            ]
+                        ]),
+                    ];
+                });
+                echo json_encode([
+                    "draw" => $draw,
+                    "recordsTotal" => $count,
+                    "recordsFiltered" => $count,
+                    "data" => $datas ?? [],
+                ]);
+            }
+        })->setPermissions(['customers-card']);
+        //customers-card
+        
     })->middleware('login');
  ?>
