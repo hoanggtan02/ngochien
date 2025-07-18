@@ -78,7 +78,7 @@ $requests = [
                 "sub" => [
                     'personnels' => [
                         "name" => $jatbi->lang("Nhân viên"),
-                        "router" => '/personnels',
+                        "router" => '/hrm/personnels',
                         "icon" => '<i class="ti ti-user"></i>',
                     ],                    
                 ],
