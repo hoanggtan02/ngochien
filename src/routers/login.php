@@ -63,6 +63,22 @@
                         "token" => $payload['token'],
                         "active" => $data['active'],
                     ]);
+                    // Lấy danh sách store còn hoạt động
+                    $ListStoreCount = $app->select("stores", "*", ["deleted"=> 0, "status"=> "A"]);
+                    if(count($ListStoreCount) > 1){
+                        if($data['stores'] == "" || count(unserialize($data['stores'])) > 1){
+                            $app->setSession('stores', 0);
+                        }
+                        else {
+                            $stores = unserialize($data['stores']);
+                            $app->setSession('stores', $stores[0]);
+                        }
+                    }
+                    else {
+                        $storeId = $app->get("stores", "id", ["deleted"=> 0, "status"=> "A"]);
+                        $app->setSession('stores', $storeId);
+                    }
+
                     if($app->xss($_POST['remember'] ?? '' )){
                         $app->setCookie('token', $token,time()+$setting['cookie'],'/');
                     }

@@ -33,7 +33,33 @@ $payment_type = [
         "id" => 2,
     ],
 ];
-
+$upload = [
+		"images" => [
+			"avatar" => [
+				"url"		=> "images/accounts/",
+				"thumb_y" 	=> "300",
+				"thumb_x" 	=> "300",
+			],
+			"products" => [
+				"url"		=> "images/products/",
+				"thumb_y" 	=> "300",
+				"thumb_x" 	=> "300",
+			],
+			"personnels" => [
+				"url"		=> "images/personnels/",
+				"thumb_y" 	=> "500",
+				"thumb_x" 	=> "500",
+			],
+			"customers" => [
+				"url"		=> "images/customers/",
+				"thumb_y" 	=> "500",
+				"thumb_x" 	=> "500",
+			],
+			"logo" => [
+				"url"		=> "images/logo/",
+			]
+		]
+	];
 return [
     "db" => [
         'type'      => $env['DB_TYPE'] ?? 'mysql',
@@ -68,5 +94,6 @@ return [
         "uploads"    => '../datas',
         "api"        => $api_transports,
         "type-payment"      => $payment_type,
+        "upload"     => $upload,
         ]
 ];

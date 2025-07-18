@@ -109,121 +109,173 @@
                 echo $app->render($setting['template'].'/users/accounts-partner.html', $vars);
             }
 
-            if ($app->method() === 'POST') {
-                $app->header(['Content-Type' => 'application/json']);
+            elseif ($app->method() === 'POST') {
+                $app->header([
+                    'Content-Type' => 'application/json',
+                ]);
 
+                // Lấy tham số từ DataTables
                 $draw = isset($_POST['draw']) ? intval($_POST['draw']) : 0;
                 $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
-                $length = isset($_POST['length']) ? intval($_POST['length']) : $setting['site_page'];
-                $searchValue = isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '';
-                $filter_permission = isset($_POST['permission']) ? $_POST['permission'] : '';
-                $filter_status = isset($_POST['status']) ? $_POST['status'] : '';
-                $orderColumnIndex = $_POST['order'][0]['column'] ?? 0;
-                $orderColumnName = $_POST['columns'][$orderColumnIndex]['name'] ?? 'id';
-                $orderDir = $_POST['order'][0]['dir'] ?? 'DESC';
+                $length = isset($_POST['length']) ? intval($_POST['length']) : $setting['site_page'] ?? 10;
+                $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
+                $orderName = isset($_POST['order'][0]['name']) ? $_POST['order'][0]['name'] : 'id';
+                $orderDir = isset($_POST['order'][0]['dir']) ? $_POST['order'][0]['dir'] : 'DESC';
+                $status = isset($_POST['status']) ? [$_POST['status'],$_POST['status']] : '';
 
-                $allowedAccountIds = [];
-                // $isSuperAdmin = ($account['stores'] == '' && ($_SESSION['stores'] ?? 0) == 0);
-
-                // if (!$isSuperAdmin) {
-                //     $allPartners = $app->select("accounts", ["id", "stores"], ["type" => 10, "deleted" => 0]);
-                //     foreach ($allPartners as $partner) {
-                //         $partnerStores = @unserialize($partner['stores']);
-                //         if (is_array($partnerStores)) {
-                //             foreach ($partnerStores as $storeId) {
-                //                 if (isset($accStore[$storeId])) {
-                //                     $allowedAccountIds[] = $partner['id'];
-                //                     break;
-                //                 }
-                //             }
-                //         }
-                //     }
-                //     if (empty($allowedAccountIds)) {
-                //         $allowedAccountIds = [0];
-                //     }
-                // }
-
+                // Điều kiện lọc
                 $where = [
                     "AND" => [
-                        // "OR" => [
-                        //     "name[~]" => $searchValue,
-                        //     "account[~]" => $searchValue,
-                        //     "email[~]" => $searchValue,
-                        // ],
-                        // "type" => 10,
-                        // "deleted" => 0,
+                        "OR" => [
+                            "accounts.name[~]" => $searchValue,
+                            "accounts.email[~]" => $searchValue,
+                            "accounts.account[~]" => $searchValue,
+                        ],
+                        "accounts.deleted" => 0,
+                        "accounts.status[<>]" => $status,
+                        "accounts.type" => 10, // Chỉ lấy tài khoản đối tác
                     ],
-                    // "LIMIT" => [$start, $length],
-                    // "ORDER" => [$orderColumnName => strtoupper($orderDir)]
+                    "LIMIT" => [$start, $length],
+                    "ORDER" => [$orderName => strtoupper($orderDir)],
                 ];
+                $session = $app->getSession("accounts");
+                $account = [];
 
-                // if (!$isSuperAdmin) {
-                //     $where['AND']['id'] = $allowedAccountIds;
-                // }
+                if (isset($session['id'])) {
+                    $account = $app->get("accounts", "*", [
+                        "id" => $session['id'],
+                        "deleted" => 0,
+                        "status" => "A",
+                    ]);
 
-                // if (!empty($filter_permission)) {
-                //     $where['AND']['permission'] = $filter_permission;
-                // } else {
-                //     unset($where['AND']['permission']);
-                // }
-
-                // if (!empty($filter_status)) {
-                //     $where['AND']['status[<>]'] = [$filter_status, $filter_status];
-                // } else {
-                //     $where['AND']['status[<>]'] = ['A', 'D'];
-                // }
-
-                $baseWhere = [
-                    "type" => 10,
-                    "deleted" => 0,
-                ];
-
-                // if (!$isSuperAdmin) {
-                //     $baseWhere['id'] = $allowedAccountIds;
-                // }
-
-                $recordsTotal = $app->count("accounts", $baseWhere);
-
-                if (count($where['AND']) > count($baseWhere)) {
-                    $recordsFiltered = $app->count("accounts", $where['AND']);
-                } else {
-                    $recordsFiltered = $recordsTotal;
+                    // Khởi tạo biến $accStore như source cũ
+                    $accStore = [];
+                    $stores = $app->select("stores", "*", ["deleted" => 0]);
+                    foreach ($stores as $itemStore) {
+                        if ($account['stores'] == '') {
+                            $accStore[0] = "0";
+                        }
+                        $accStore[$itemStore['id']] = $itemStore['id'];
+                    }
                 }
+                
+                $Accsearchs = $app->select("accounts", [
+                    "[>]permission" => ["permission" => "id"],
+                ], [
+                    "accounts.id",
+                    "accounts.name",
+                    "accounts.status",
+                    "accounts.email",
+                    "accounts.avatar",
+                    "accounts.account",
+                    "accounts.phone",
+                    "accounts.stores",
+                ], $where);
 
+                foreach ($Accsearchs as $key => $search) {
+                    if($account['stores']=='' && $_SESSION['stores']==0){
+                        $Search_ACC[$search['id']] = $search['id'];
+                    }
+                    else {
+                        $getACCStores[$search['id']] = unserialize($search['stores']);
+                        foreach ($getACCStores[$search['id']] as $key => $value) {
+                            if($accStore[$value]==$value){
+                                $Search_ACC[$search['id']] = $search['id'];
+                            }
+                        }
+                    }
+                    
+                }
+                $where1 = [
+                    "AND" => [
+                        "OR" => [
+                            "accounts.name[~]" => $searchValue,
+                            "accounts.email[~]" => $searchValue,
+                            "accounts.account[~]" => $searchValue,
+                        ],
+                        "accounts.id" => $Search_ACC,
+                        "accounts.deleted" => 0,
+                        "accounts.status[<>]" => $status,
+                        "accounts.type" => 10, // Chỉ lấy tài khoản đối tác
+                    ],
+                    "LIMIT" => [$start, $length],
+                    "ORDER" => [$orderName => strtoupper($orderDir)],
+                ];
+
+                $where2 = [
+                    "AND" => [
+                        "OR" => [
+                            "accounts.name[~]" => $searchValue,
+                            "accounts.email[~]" => $searchValue,
+                            "accounts.account[~]" => $searchValue,
+                        ],
+                        "accounts.id" => $Search_ACC,
+                        "accounts.deleted" => 0,
+                        "accounts.status[<>]" => $status,
+                        "accounts.type" => 10, // Chỉ lấy tài khoản đối tác
+                    ],
+                ];
+                $count = $app->count("accounts", [
+                    "AND" => $where2['AND'],
+                ]);
+
+                // Lấy dữ liệu phiếu giảm giá
                 $datas = [];
-                $accountsList = $app->select("accounts", "*", $where);
-                var_dump($accountsList);
-
-                foreach ($accountsList as $data) {
+                $app->select("accounts" , [
+                    "[>]permission" => ["permission" => "id"],
+                ],[
+                    "accounts.id",
+                    "accounts.name",
+                    "accounts.status",
+                    "accounts.email",
+                    "accounts.avatar",
+                    "accounts.account",
+                    "accounts.phone",
+                    "permission.name (permission_name)" // alias để dễ truy xuất
+                ], $where1, function ($data) use (&$datas, $jatbi, $app, $setting) {
                     $datas[] = [
                         "checkbox" => $app->component("box", ["data" => $data['id']]),
+                        "image" => '<img data-src="/' . $setting['upload']['images']['avatar']['url'] . $data['avatar'] . '" class="width rounded-circle me-2 lazyload" style="--width:40px">',
                         "name" => $data['name'],
-                        "account" => '<div>' . htmlspecialchars($data['account']) . '</div><small class="text-muted">' . htmlspecialchars($data['email']) . '</small>',
+                        "account" => $data['account'],
+                        "email" => $data['email'],
                         "phone" => $data['phone'],
-                        "status" => $app->component("status", ["data" => $data['status'], "id" => $data['id'], "permission" => "accounts-partner.edit"]),
+                        "status" => $app->component("status", [
+                            "url" => "/province/province-status/" . $data['id'],
+                            "data" => $data['status'],
+                            "permission" => ['province.edit']
+                        ]),
                         "action" => $app->component("action", [
                             "button" => [
                                 [
+                                    'type' => 'link',
+                                    'name' => $jatbi->lang("Xem"),
+                                    'permission' => ['province'],
+                                    'action' => ['href' => '/coupons/coupons-views/' . $data['id'], 'data-pjax' => '']
+                                ],
+                                [
                                     'type' => 'button',
-                                    'name' => $jatbi->lang("Chỉnh sửa"),
-                                    'permission' => ['accounts-partner.edit'],
-                                    'action' => ['data-url' => '/admin/accounts-partner-edit/' . $data['id'], 'data-action' => 'modal']
+                                    'name' => $jatbi->lang("Sửa"),
+                                    'permission' => ['province.edit'],
+                                    'action' => ['data-url' => '/coupons/coupons-edit/' . $data['id'], 'data-action' => 'modal']
                                 ],
                                 [
                                     'type' => 'button',
                                     'name' => $jatbi->lang("Xóa"),
-                                    'permission' => ['accounts-partner.delete'],
-                                    'action' => ['data-url' => '/admin/accounts-partner-delete?id=' . $data['id'], 'data-action' => 'modal-confirm']
+                                    'permission' => ['province.deleted'],
+                                    'action' => ['data-url' => '/coupons/coupons-deleted?box=' . $data['id'], 'data-action' => 'modal']
                                 ],
                             ]
                         ]),
                     ];
-                }
+                });
+
+                // Trả về dữ liệu JSON
                 echo json_encode([
                     "draw" => $draw,
-                    "recordsTotal" => $recordsTotal,
-                    "recordsFiltered" => $recordsFiltered,
-                    "data" => $datas
+                    "recordsTotal" => $count,
+                    "recordsFiltered" => $count,
+                    "data" => $datas ?? [],
                 ]);
             }
         })->setPermissions(['accounts-partner']);
