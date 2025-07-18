@@ -135,8 +135,6 @@
                         "accounts.status[<>]" => $status,
                         "accounts.type" => 10, // Chỉ lấy tài khoản đối tác
                     ],
-                    "LIMIT" => [$start, $length],
-                    "ORDER" => [$orderName => strtoupper($orderDir)],
                 ];
                 $session = $app->getSession("accounts");
                 $account = [];
