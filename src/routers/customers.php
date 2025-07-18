@@ -1309,6 +1309,104 @@
             }
         })->setPermissions(['customers-card']);
         //customers-card
+
+
+
+
+
+
+    
+//route customers-types
+$app->router("/customers-types", ['GET', 'POST'], function ($vars) use ($app, $jatbi, $setting) {
+        $jatbi->permission('customers-types');
+        $vars['title'] = $jatbi->lang("Loại khách hàng");
+
+        if ($app->method() === 'GET') {
+            echo $app->render($setting['template'] . '/customers/customers-types.html', $vars);
+        }
+        if ($app->method() === 'POST') {
+            $app->header(['Content-Type' => 'application/json; charset=utf-8']);
+
+            $draw = isset($_POST['draw']) ? intval($_POST['draw']) : 0;
+            $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
+            $length = isset($_POST['length']) ? intval($_POST['length']) : 10;
+            $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
+            $statusValue = isset($_POST['status']) ? $_POST['status'] : '';
+            $orderName = isset($_POST['order'][0]['name']) ? $_POST['order'][0]['name'] : 'id';
+            $orderDir = isset($_POST['order'][0]['dir']) ? $_POST['order'][0]['dir'] : 'DESC';
+
+            $where = [
+                "AND" => [
+                    "OR" => [
+                        'customers_types.name[~]' => $searchValue,
+                        'customers_types.notes[~]' => $searchValue,
+                    ],
+                    'deleted' => 0,
+                ],
+                "LIMIT" => [$start, $length],
+                "ORDER" => [$orderName => strtoupper($orderDir)],
+            ];
+
+            if ($statusValue != '') {
+                $where['AND']['customers_types.status'] = $statusValue;
+            }
+
+            $countWhere = [
+                "AND" => array_merge(
+                    ["customers_types.deleted" => 0],
+                    $searchValue != '' ? [
+                        "OR" => [
+                           
+                            'customers_types.name[~]' => $searchValue,
+                            'customers_types.notes[~]' => $searchValue,
+                        ]
+                    ] : [],
+                    $statusValue != '' ? ["customers_types.status" => $statusValue] : []
+                )
+            ];
+            $count = $app->count("customers_types", $countWhere);
+
+            $datas = [];
+            $app->select("customers_types", "*", $where, function ($data) use (&$datas, $jatbi, $app) {
+                $datas[] = [
+                    "checkbox" => $app->component("box", ["data" => $data['id']]),
+                    "name" => ($data['name'] ?? ''),
+                    "notes" => ($data['notes'] ?? ''),
+                    "status" => ($app->component("status", [
+                        "url" => "/customers/customers-types/" . ($data['id'] ?? ''),
+                        "data" => $data['status'] ?? '',
+                        "permission" => ['customers-types.edit']
+                    ]) ?? '<span>' . ($data['status'] ?? '') . '</span>'),
+                    "action" => ($app->component("action", [
+                        "button" => [
+                            [
+                                'type' => 'button',
+                                'name' => $jatbi->lang("Sửa"),
+                                'permission' => ['customers-types.edit'],
+                                'action' => ['data-url' => '/customers/customers-types/' . ($data['id'] ?? ''), 'data-action' => 'modal']
+                            ],
+                            [
+                                'type' => 'button',
+                                'name' => $jatbi->lang("Xóa"),
+                                'permission' => ['customers-types.deleted'],
+                                'action' => ['data-url' => '/customers-types/customers-types-deleted?box=' . ($data['id'] ?? ''), 'data-action' => 'modal']
+                            ],
+                        ]
+                    ]))
+                ];
+            });
+
+            echo json_encode(
+                [
+                    "draw" => $draw,
+                    "recordsTotal" => $count,
+                    "recordsFiltered" => $count,
+                    "data" => $datas ?? []
+                ]
+            );
+        }
+    })->setPermissions(['customers-types']);
+
         
     })->middleware('login');
  ?>

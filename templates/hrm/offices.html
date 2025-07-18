@@ -74,12 +74,19 @@
                     style="width:100%">
                 <thead>
                     <tr>
-                        <th data-name="checkbox" data-orderable="false" class="text-center"><div class="form-check"><input class="form-check-input checkall" type="checkbox" data-checkbox="input.checker"></div></th>
-                        <th data-name="code"><?=$jatbi->lang("Mã")?></th>
-                        <th data-name="name"><?=$jatbi->lang("Tên")?></th>
-                        <th data-name="notes"><?=$jatbi->lang("Ghi chú")?></th>
-                        <th data-name="status" class="text-center"><?=$jatbi->lang("Trạng thái")?></th>
-                        <th data-name="action" class="text-end"><?=$jatbi->lang("Tùy chọn")?></th>
+                       <th data-name="checkbox" data-orderable="false" class="text-nowrap " data-visible="true" data-class="text-center"><div class="form-check"><input class="form-check-input checkall" type="checkbox" value="" data-checkbox="input.checker"></div></th>
+                        <th data-name="code" data-searchable="true" data-orderable="true" class="text-nowrap " data-visible="true" data-class="text-nowrap"><?=$jatbi->lang("Mã")?></th>
+                        <th data-name="name" data-searchable="true" data-orderable="true" class="text-nowrap " data-visible="true" data-class="text-nowrap"><?=$jatbi->lang("Tên")?></th>
+                        <th data-name="notes" data-orderable="false" class="text-nowrap " data-visible="true" data-class="text-start"><?=$jatbi->lang("Ghi chú")?></th> 
+                        <th data-name="status" data-orderable="false" class="text-nowrap " data-visible="true" data-class="text-center"><?=$jatbi->lang("Trạng thái")?></th>
+                        <th data-name="action" data-orderable="false" class="text-nowrap " data-visible="true" data-class="text-end"><?=$jatbi->lang("Tùy chọn")?></th>
+
+
+                         
+                        
+                                           
+
+
                     </tr>
                 </thead>
             </table>
