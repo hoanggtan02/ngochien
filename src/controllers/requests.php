@@ -45,7 +45,7 @@ $requests = [
                         "name" => $jatbi->lang("Khách hàng & NCC"),
                         "router" => '/customers',
                         "icon" => '<i class="ti ti-user"></i>',
-                    ],
+                    ],                    
                     'customers.overview' => [
                         "name" => $jatbi->lang("Tổng quan"),
                         "router" => '/customers/overview',
@@ -69,6 +69,26 @@ $requests = [
                     'customers.config.add' => $jatbi->lang("Thêm Cấu hình khách hàng"),
                     'customers.config.edit' => $jatbi->lang("Sửa Cấu hình khách hàng"),
                     'customers.config.deleted' => $jatbi->lang("Xóa Cấu hình khách hàng"),
+                ]
+            ],
+            'hrm' => [
+                "menu" => $jatbi->lang("Nhân sự"),
+                "url" => '/hrm',
+                "icon" => '<i class="ti ti-user"></i>',
+                "sub" => [
+                    'personnels' => [
+                        "name" => $jatbi->lang("Nhân viên"),
+                        "router" => '/personnels',
+                        "icon" => '<i class="ti ti-user"></i>',
+                    ],                    
+                ],
+                "main" => 'false',
+                "permission" => [
+                    'personnels' => $jatbi->lang("Nhân viên"),
+                    'personnels.add' => $jatbi->lang("Thêm Nhân viên"),
+                    'personnels.edit' => $jatbi->lang("Sửa Nhân viên"),
+                    'personnels.deleted' => $jatbi->lang("Xóa Nhân viên"),
+
                 ]
             ],
         ],
