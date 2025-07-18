@@ -81,6 +81,11 @@ $requests = [
                 "url" => '/users',
                 "icon" => '<i class="ti ti-user "></i>',
                 "sub" => [
+                    'accounts-partner' => [
+                        "name" => $jatbi->lang("Tài khoản đối tác"),
+                        "router" => '/users/accounts-partner',
+                        "icon" => '<i class="ti ti-user"></i>',
+                    ],
                     'accounts' => [
                         "name" => $jatbi->lang("Tài khoản"),
                         "router" => '/users/accounts',
@@ -102,6 +107,10 @@ $requests = [
                     'permission.add' => $jatbi->lang("Thêm Nhóm quyền"),
                     'permission.edit' => $jatbi->lang("Sửa Nhóm quyền"),
                     'permission.deleted' => $jatbi->lang("Xóa Nhóm quyền"),
+                    'accounts-partner' => $jatbi->lang("Tài khoản đối tác"),
+                    'accounts-partner.add' => $jatbi->lang("Thêm Tài khoản đối tác"),
+                    'accounts-partner.edit' => $jatbi->lang("Sửa Tài khoản đối tác"),
+                    'accounts-partner.deleted' => $jatbi->lang("Xóa Tài khoản đối tác"),
                 ]
             ],
             'areas' => [
@@ -111,17 +120,17 @@ $requests = [
                 "sub" => [
                     'province'		=>[
 						"name"	=> $jatbi->lang("Tỉnh thành"),
-						"router"=> 'province',
+						"router"=> '/areas/province',
 						"icon"	=> '<i class="fas fa-city"></i>',
 					],
 					'district'		=>[
 						"name"	=> $jatbi->lang("Quận huyện"),
-						"router"=> 'district',
+						"router"=> '/areas/district',
 						"icon"	=> '<i class="fas fa-archway"></i>',
 					],
 					'ward'		=>[
 						"name"	=> $jatbi->lang("Phường xã"),
-						"router"=> 'ward',
+						"router"=> '/areas/ward',
 						"icon"	=> '<i class="fas fa-road"></i>',
 					], 
                 ],

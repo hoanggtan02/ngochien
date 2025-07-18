@@ -1077,18 +1077,24 @@
                 $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
                 $orderName = isset($_POST['order'][0]['name']) ? $_POST['order'][0]['name'] : 'id';
                 $orderDir = isset($_POST['order'][0]['dir']) ? $_POST['order'][0]['dir'] : 'DESC';
-                $status = isset($_POST['status']) ? ($_POST['status'] ? [$_POST['status']] : ['A', 'D']) : ['A', 'D'];
+                $status = isset($_POST['status']) ? [$_POST['status'],$_POST['status']] : '';
 
                 // Điều kiện lọc
                 $where = [
                     "AND" => [
-                        "name[~]" => $searchValue ?: '%',
-                        "status[<>]" => $status,
-                        "deleted" => 0,
+                        "OR" => [
+                            "coupons.name[~]" => $searchValue,
+                            "coupons.code[~]" => $searchValue,
+                        ],
+                        "coupons.deleted" => 0,
+                        "coupons.status[<>]" => $status,
                     ],
                     "LIMIT" => [$start, $length],
                     "ORDER" => [$orderName => strtoupper($orderDir)],
                 ];
+                // if ($status != '') {
+                //     $where['AND']['status'] = $status; // lọc đúng theo trạng thái chọn
+                // }
 
                 // Đếm tổng số bản ghi
                 $count = $app->count("coupons", [
