@@ -116,7 +116,7 @@ $requests = [
             'areas' => [
                 "menu" => $jatbi->lang("Khu vực"),
                 "url" => '/areas/province/',
-				"icon"=>'<i class="ti ti-map"></i>',
+                "icon" => '<i class="ti ti-map"></i>',
                 "sub" => [
                     'province'		=>[
 						"name"	=> $jatbi->lang("Tỉnh thành"),
@@ -133,6 +133,7 @@ $requests = [
 						"router"=> '/areas/ward',
 						"icon"	=> '<i class="fas fa-road"></i>',
 					], 
+
                 ],
                 "main" => 'false',
                 "permission" => [
@@ -169,12 +170,12 @@ $requests = [
                         "name" => $jatbi->lang("Vận chuyển"),
                         "router" => '/admin/transport',
                         "icon" => '<i class="fas fa-shipping-fast"></i>',
-                    ], 
-                    'type-payments'	=> [
-						"name"	=> $jatbi->lang("Hình thức thanh toán"),
-						"router"	=> '/admin/type-payments',
-						"icon"	=> '<i class="fas fa-money-bill-wave"></i>',
-					],                   
+                    ],
+                    'type-payments' => [
+                        "name" => $jatbi->lang("Hình thức thanh toán"),
+                        "router" => '/admin/type-payments',
+                        "icon" => '<i class="fas fa-money-bill-wave"></i>',
+                    ],
                     'flood' => [
                         "name" => $jatbi->lang("Danh sách chặn"),
                         "router" => '/admin/flood',
@@ -230,23 +231,6 @@ $requests = [
                     'type-payments.deleted' => $jatbi->lang("Xóa Hình thức thanh toán"),
                 ]
             ],
-        ],
-    ],
-];
-$api_transports = [
-    "1" => [
-        "id" => 1,
-        "name" => $jatbi->lang("Không Tích Hợp"),
-        "code" => 'KTH',
-        "logo" => '',
-    ],
-    "2" => [
-        "id" => 2,
-        "name" => $jatbi->lang("Giao Hàng Nhanh"),
-        "code" => 'GHN',
-        "logo" => '',
-        "API" => [
-            "token" => 'Token',
         ],
     ],
 ];

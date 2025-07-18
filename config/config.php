@@ -5,7 +5,7 @@ $env = parse_ini_file(__DIR__ . '/../.env');
 $api_transports = [
     "1" => [
         "id" => 1,
-        "name" =>"Không Tích Hợp",
+        "name" => "Không Tích Hợp",
         "code" => 'KTH',
         "logo" => '',
     ],
@@ -19,6 +19,21 @@ $api_transports = [
         ],
     ],
 ];
+$payment_type = [
+    "1" => [
+        "name" => 'Bán hàng',
+        "id" => 1,
+    ],
+    "2" => [
+        "name" =>  'Trả hàng',
+        "id" => 2,
+    ],
+    "3" => [
+        "name" =>  'Bảo hành',
+        "id" => 2,
+    ],
+];
+
 return [
     "db" => [
         'type'      => $env['DB_TYPE'] ?? 'mysql',
@@ -52,5 +67,6 @@ return [
         "plugins"    => '../plugins',
         "uploads"    => '../datas',
         "api"        => $api_transports,
+        "type-payment"      => $payment_type,
         ]
 ];

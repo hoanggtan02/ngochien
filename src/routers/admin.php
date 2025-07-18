@@ -1171,10 +1171,7 @@
                 $datas = [];
                 $allData = $app->select("type_payments", "*", $where);
 
-                $payment_type_map = [
-                    '1' => 'Bán hàng',
-                    '2' => 'Mua hàng',
-                ];
+
 
         
                 foreach ($allData as $data) {
@@ -1192,8 +1189,7 @@
                         "credit_account" => $credit_account_text,
                         "debit_account" => $debit_account_text,
                         "main" => $app->get("type_payments", "name", ["id" => $data['main']]),
-                    
-                        "payment_type" => $payment_type_map[$data['type']] ?? 'Không xác định',
+                        "payment_type" => $setting["type-payment"][$data['type']]['name'] ?? 'Không xác định',
                         "notes" => $data['notes'] ?? '',
                         "status" => $app->component("status", [
                             "url" => "/admin/type-payments-status/" . ($data['active'] ?? ''),
@@ -1227,10 +1223,9 @@
                         "recordsFiltered" => $count,
                         "data" => $datas ?? []
                     ],
-                    JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE
+        
                 );
                 
-                exit();
             }
         })->setPermissions(['type-payments']);
         //type-payments end
