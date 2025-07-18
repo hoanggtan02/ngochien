@@ -80,15 +80,20 @@ $requests = [
                         "name" => $jatbi->lang("Nhân viên"),
                         "router" => '/hrm/personnels',
                         "icon" => '<i class="ti ti-user"></i>',
+                    ],
+                    'offices' => [
+                    "name" => $jatbi->lang("Phòng ban"),
+                    "router" => '/hrm/offices',
+                    "icon" => '<i class="ti ti-user"></i>',
                     ],                    
                 ],
                 "main" => 'false',
                 "permission" => [
-                    'personnels' => $jatbi->lang("Nhân viên"),
-                    'personnels.add' => $jatbi->lang("Thêm Nhân viên"),
-                    'personnels.edit' => $jatbi->lang("Sửa Nhân viên"),
-                    'personnels.deleted' => $jatbi->lang("Xóa Nhân viên"),
-
+                    'offices' => $jatbi->lang("Phòng ban"),
+                    'offices.add' => $jatbi->lang("Thêm phòng ban"),
+                    'offices.edit' => $jatbi->lang("Sửa phòng ban"),
+                    'offices.deleted' => $jatbi->lang("Xóa phòng ban"),
+      'personnels' => $jatbi->lang("Phòng ban"),
                 ]
             ],
         ],

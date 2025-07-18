@@ -96,5 +96,103 @@
                 ]);
             }
         })->setPermissions(['personnels']);
-    })->middleware('login');
+
+
+
+
+    // Route offices
+    $app->router("/offices", ['GET', 'POST'], function ($vars) use ($app, $jatbi, $setting) {
+        $jatbi->permission('offices');
+        $vars['title'] = $jatbi->lang("Phòng ban");
+
+        if ($app->method() === 'GET') {
+            echo $app->render($setting['template'] . '/hrm/offices.html', $vars);
+        }
+        if ($app->method() === 'POST') {
+            $app->header(['Content-Type' => 'application/json; charset=utf-8']);
+
+            $draw = isset($_POST['draw']) ? intval($_POST['draw']) : 0;
+            $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
+            $length = isset($_POST['length']) ? intval($_POST['length']) : 10;
+            $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
+            $statusValue = isset($_POST['status']) ? $_POST['status'] : '';
+            $orderName = isset($_POST['order'][0]['name']) ? $_POST['order'][0]['name'] : 'id';
+            $orderDir = isset($_POST['order'][0]['dir']) ? $_POST['order'][0]['dir'] : 'DESC';
+
+            $where = [
+                "AND" => [
+                    "OR" => [
+                        'offices.code[~]' => $searchValue,
+                        'offices.name[~]' => $searchValue,
+                        'offices.notes[~]' => $searchValue,
+                    ],
+                    'deleted' => 0,
+                ],
+                "LIMIT" => [$start, $length],
+                "ORDER" => [$orderName => strtoupper($orderDir)],
+            ];
+
+            if ($statusValue != '') {
+                $where['AND']['offices.status'] = $statusValue;
+            }
+
+            $countWhere = [
+                "AND" => array_merge(
+                    ["offices.deleted" => 0],
+                    $searchValue != '' ? [
+                        "OR" => [
+                            'offices.code[~]' => $searchValue,
+                            'offices.name[~]' => $searchValue,
+                            'offices.notes[~]' => $searchValue,
+                        ]
+                    ] : [],
+                    $statusValue != '' ? ["offices.status" => $statusValue] : []
+                )
+            ];
+            $count = $app->count("offices", $countWhere);
+
+            $datas = [];
+            $app->select("offices", "*", $where, function ($data) use (&$datas, $jatbi, $app) {
+                $datas[] = [
+                    "checkbox" => $app->component("box", ["data" => $data['id']]),
+                    "code" => ($data['code'] ?? ''),
+                    "name" => ($data['name'] ?? ''),
+                    "notes" => ($data['notes'] ?? ''),
+                    "status" => ($app->component("status", [
+                        "url" => "/hrm/offices-status/" . ($data['id'] ?? ''),
+                        "data" => $data['status'] ?? '',
+                        "permission" => ['offices.edit']
+                    ]) ?? '<span>' . ($data['status'] ?? '') . '</span>'),
+                    "action" => ($app->component("action", [
+                        "button" => [
+                            [
+                                'type' => 'button',
+                                'name' => $jatbi->lang("Sửa"),
+                                'permission' => ['offices.edit'],
+                                'action' => ['data-url' => '/hrm/offices-edit/' . ($data['id'] ?? ''), 'data-action' => 'modal']
+                            ],
+                            [
+                                'type' => 'button',
+                                'name' => $jatbi->lang("Xóa"),
+                                'permission' => ['offices.deleted'],
+                                'action' => ['data-url' => '/hrm/offices-deleted?box=' . ($data['id'] ?? ''), 'data-action' => 'modal']
+                            ],
+                        ]
+                    ]))
+                ];
+            });
+
+            echo json_encode(
+                [
+                    "draw" => $draw,
+                    "recordsTotal" => $count,
+                    "recordsFiltered" => $count,
+                    "data" => $datas ?? []
+                ]
+            );
+        }
+    })->setPermissions(['offices']);
+
+})->middleware('login');
+
 ?>
